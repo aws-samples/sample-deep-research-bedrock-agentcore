@@ -61,12 +61,10 @@ GATEWAY_TOOL_CATEGORIES: Dict[str, str] = {
 # ============================================================================
 
 RESEARCH_TYPE_TOOLS: Dict[str, List[str]] = {
-    # Basic Web: Essential web search + Wikipedia
+    # Basic Web: DuckDuckGo search + Wikipedia only
     ResearchType.BASIC_WEB.value: [
         "ddg_search",
-        "google_web_search",
-        "tavily_search",
-        "tavily_extract",
+        "ddg_news",
         "wikipedia_search",
         "wikipedia_get_article",
     ],

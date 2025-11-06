@@ -98,15 +98,22 @@ export default function ResearchHistory({ addNotification }) {
       id: 'topic',
       header: 'Topic',
       cell: item => (
-        <Link
-          onFollow={(e) => {
-            e.preventDefault();
-            navigate(`/research/${item.session_id}`);
-          }}
-          href={`#/research/${item.session_id}`}
-        >
-          {item.topic}
-        </Link>
+        <div style={{
+          maxWidth: '330px',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap'
+        }} title={item.topic}>
+          <Link
+            onFollow={(e) => {
+              e.preventDefault();
+              navigate(`/research/${item.session_id}`);
+            }}
+            href={`#/research/${item.session_id}`}
+          >
+            {item.topic}
+          </Link>
+        </div>
       ),
       sortingField: 'topic',
       width: 350

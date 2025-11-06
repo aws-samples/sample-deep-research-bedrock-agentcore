@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 async def load_tools_for_research_type(
     research_type: str,
-    include_local: bool = True
+    include_local: bool = False
 ) -> List[Any]:
     """
     Load all tools for a specific research type
@@ -30,7 +30,8 @@ async def load_tools_for_research_type(
 
     Args:
         research_type: Research type (e.g., 'academic', 'financial')
-        include_local: Whether to include local tools
+        include_local: Whether to include local tools (default: False, as local tools
+                      are typically used by writing/chart agents, not research agents)
 
     Returns:
         List of LangChain tool objects ready for use
