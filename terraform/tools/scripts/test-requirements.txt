@@ -1,0 +1,16 @@
+# Requirements for testing scripts (local development only)
+# Updated: 2024-10-29
+
+# AWS SDK for Lambda invocation and Secrets Manager
+# Using >= to allow compatible updates
+boto3>=1.40.0,<2.0.0
+
+# Note: Most testing can be done with just boto3 using:
+#   - aws lambda invoke (direct Lambda testing)
+#   - aws logs tail (CloudWatch logs)
+#   - aws secretsmanager get-secret-value
+
+# Optional: Only needed for advanced Gateway MCP protocol testing
+# If you want to test Gateway directly with test-gateway.py, uncomment:
+# mcp>=1.19.0,<2.0.0
+# httpx>=0.28.0,<1.0.0

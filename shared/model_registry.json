@@ -1,0 +1,97 @@
+{
+  "models": {
+    "nova_pro": {
+      "id": "nova_pro",
+      "label": "Amazon Nova Pro",
+      "description": "Fast and cost-effective model for most research tasks",
+      "bedrock_id": "us.amazon.nova-pro-v1:0",
+      "provider": "amazon",
+      "category": "general",
+      "recommended_for": ["chat", "research"]
+    },
+    "claude_sonnet45": {
+      "id": "claude_sonnet45",
+      "label": "Claude Sonnet 4.5",
+      "description": "Most capable model with superior reasoning and analysis",
+      "bedrock_id": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+      "provider": "anthropic",
+      "category": "premium",
+      "recommended_for": ["research", "chat"]
+    },
+    "claude_haiku45": {
+      "id": "claude_haiku45",
+      "label": "Claude Haiku 4.5",
+      "description": "Fastest and most cost-effective Claude model",
+      "bedrock_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+      "provider": "anthropic",
+      "category": "fast",
+      "recommended_for": ["chat", "research"]
+    },
+    "qwen3_mixed": {
+      "id": "qwen3_mixed",
+      "label": "Qwen3",
+      "description": "Mix of Qwen3-32B and Qwen3-235B optimized by task complexity",
+      "bedrock_id": "qwen.qwen3-32b-v1:0",
+      "provider": "qwen",
+      "category": "general",
+      "recommended_for": ["research"]
+    },
+    "llama_maverick": {
+      "id": "llama_maverick",
+      "label": "Llama Maverick",
+      "description": "Open source model for research tasks",
+      "bedrock_id": "us.meta.llama4-maverick-17b-instruct-v1:0",
+      "provider": "meta",
+      "category": "open-source",
+      "recommended_for": ["research"]
+    }
+  },
+  "aliases": {
+    "claude_haiku": "claude_haiku45",
+    "claude_sonnet": "claude_sonnet45",
+    "haiku45": "claude_haiku45",
+    "sonnet45": "claude_sonnet45"
+  },
+  "research_combinations": {
+    "nova_pro": {
+      "reference_prep": "nova_pro",
+      "topic_analysis": "nova_pro",
+      "aspect_analysis": "nova_pro",
+      "research_planning": "nova_pro",
+      "research_agent": "nova_pro",
+      "dimension_reduction": "nova_pro",
+      "report_writing": "nova_pro",
+      "chart_generation": "nova_pro"
+    },
+    "claude_sonnet45": {
+      "reference_prep": "claude_sonnet45",
+      "topic_analysis": "claude_sonnet45",
+      "aspect_analysis": "claude_sonnet45",
+      "research_planning": "claude_sonnet45",
+      "research_agent": "claude_sonnet45",
+      "dimension_reduction": "claude_sonnet45",
+      "report_writing": "claude_sonnet45",
+      "chart_generation": "claude_sonnet45"
+    },
+    "claude_haiku45": {
+      "reference_prep": "claude_haiku45",
+      "topic_analysis": "claude_haiku45",
+      "aspect_analysis": "claude_haiku45",
+      "research_planning": "claude_haiku45",
+      "research_agent": "claude_haiku45",
+      "dimension_reduction": "claude_haiku45",
+      "report_writing": "claude_haiku45",
+      "chart_generation": "claude_haiku45"
+    },
+    "qwen3_mixed": {
+      "reference_prep": "qwen3_mixed",
+      "topic_analysis": "qwen3_mixed",
+      "aspect_analysis": "qwen3_mixed",
+      "research_planning": "qwen3_mixed",
+      "research_agent": "qwen3_mixed",
+      "dimension_reduction": "qwen3_mixed",
+      "report_writing": "qwen3_mixed",
+      "chart_generation": "qwen3_mixed"
+    }
+  }
+}

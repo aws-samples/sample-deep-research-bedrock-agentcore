@@ -1,0 +1,23 @@
+.env
+.bedrock_agentcore.yaml
+venv
+workspace
+*__pycache__*
+.DS_Store
+terraform.tfvars
+*node_modules*
+output
+.claude
+test_output
+frontend-config.json
+gateway_config.json
+
+# Terraform
+**/.terraform/
+# Keep lock file for consistent provider versions
+# **/.terraform.lock.hcl
+**/terraform.tfstate
+**/terraform.tfstate.backup
+**/terraform.tfstate.*.backup
+**/tfplan
+**/tfplan.binary

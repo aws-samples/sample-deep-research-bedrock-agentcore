@@ -1,0 +1,35 @@
+.review-layout {
+  display: grid;
+  grid-template-columns: minmax(600px, 1fr) 450px;
+  gap: 40px;
+  min-height: 800px;
+  max-width: 1800px;
+  margin: 0 auto;
+  padding: 0 var(--space-scaled-l);
+}
+
+.document-panel {
+  overflow-y: auto;
+  max-height: calc(100vh - 200px);
+}
+
+.comments-panel {
+  overflow-y: auto;
+  max-height: calc(100vh - 200px);
+  position: sticky;
+  top: var(--space-scaled-m);
+  align-self: start;
+}
+
+/* Responsive design */
+@media (max-width: 1200px) {
+  .review-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .comments-panel {
+    position: relative;
+    top: 0;
+    max-height: none;
+  }
+}

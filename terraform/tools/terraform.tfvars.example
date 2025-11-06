@@ -1,0 +1,19 @@
+# Copy this file to terraform.tfvars and fill in your values
+
+aws_region   = "us-west-2"
+project_name = "research-gateway"
+environment  = "dev"
+
+# Required: Tavily API Key
+# Get it from: https://tavily.com
+tavily_api_key = "tvly-xxxxxxxxxxxxxxxxxxxx"
+
+# Optional overrides
+# lambda_timeout     = 60
+# lambda_memory_size = 512
+
+tags = {
+  Project   = "Research Gateway"
+  Owner     = "Your Name"
+  ManagedBy = "Terraform"
+}

@@ -1,0 +1,10 @@
+# AWS Configuration
+aws_region  = "us-west-2"
+environment = "dev"
+
+# AgentCore Configuration
+agentcore_memory_id = "ResearchMemory-2OeNa02agH"
+
+# Application Configuration
+log_level   = "INFO"
+enable_xray = false

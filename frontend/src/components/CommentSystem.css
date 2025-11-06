@@ -1,0 +1,22 @@
+.comment-system {
+  height: 100%;
+  overflow-y: auto;
+}
+
+.comment-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.comment-card-header:hover {
+  background-color: #f0f8ff;
+}
+
+.comment-input-section {
+  margin-bottom: var(--space-scaled-m);
+}

@@ -1,0 +1,10 @@
+# Lambda Dependencies
+# Note: boto3, botocore are already available in Lambda runtime
+# Updated: 2024-10-29
+
+# HTTP client for Tavily API calls
+# Using >= to allow compatible newer versions
+requests>=2.32.0,<3.0.0
+
+# No need to specify sub-dependencies (certifi, urllib3, etc.)
+# They are automatically installed with compatible versions

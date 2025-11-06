@@ -1,0 +1,11 @@
+# Research Gateway Lambdas - Testing and Development Dependencies
+
+# MCP Client for Gateway testing
+fastmcp>=2.0.0
+
+# AWS SDK for Python (for deployment and testing)
+boto3>=1.35.0
+botocore>=1.35.0
+
+# JSON processing
+pyyaml>=6.0.0

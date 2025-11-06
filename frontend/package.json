@@ -1,0 +1,74 @@
+{
+  "name": "deep-research-frontend",
+  "version": "1.0.0",
+  "description": "Frontend for Deep Research Agent",
+  "private": true,
+  "dependencies": {
+    "@aws-amplify/ui-react": "^6.13.1",
+    "@aws-sdk/client-bedrock-agent-runtime": "^3.922.0",
+    "@aws-sdk/client-bedrock-agentcore": "^3.922.0",
+    "@cloudscape-design/chat-components": "^1.0.72",
+    "@cloudscape-design/code-view": "^3.0.69",
+    "@cloudscape-design/component-toolkit": "^1.0.0-beta.118",
+    "@cloudscape-design/components": "^3.0.1082",
+    "@cloudscape-design/design-tokens": "^3.0.60",
+    "@cloudscape-design/global-styles": "^1.0.45",
+    "aws-amplify": "^6.15.7",
+    "axios": "^1.11.0",
+    "buffer": "^6.0.3",
+    "process": "^0.11.10",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-markdown": "^10.1.0",
+    "react-router-dom": "^6.20.0",
+    "react-scripts": "5.0.1",
+    "reactflow": "^11.11.4",
+    "rehype-raw": "^7.0.0",
+    "rehype-sanitize": "^6.0.0",
+    "remark-gfm": "^4.0.1",
+    "typescript": "^4.9.5",
+    "web-vitals": "^3.5.0"
+  },
+  "scripts": {
+    "generate-config": "node ../scripts/generate-model-config.js",
+    "prebuild": "npm run generate-config",
+    "prestart": "npm run generate-config",
+    "start": "craco start",
+    "dev": "craco start",
+    "build": "craco build",
+    "test": "craco test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@craco/craco": "7.1.0",
+    "@types/jest": "^27.5.0",
+    "@types/node": "^18.0.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "autoprefixer": "^10.4.21",
+    "webpack-dev-server": "5.2.2"
+  },
+  "overrides": {
+    "nth-check": ">=2.0.1",
+    "postcss": ">=8.4.31"
+  },
+  "proxy": "http://localhost:8000"
+}

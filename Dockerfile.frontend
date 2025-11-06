@@ -1,0 +1,58 @@
+# ============================================================================
+# Multi-stage Dockerfile for Frontend (React + TypeScript BFF Server)
+# ============================================================================
+
+# Stage 1: Copy pre-built React Frontend
+FROM node:18-alpine AS frontend-builder
+
+WORKDIR /app/frontend
+
+# Copy pre-built frontend (built locally with correct env vars)
+COPY frontend/build ./build
+
+# Stage 2: Build TypeScript BFF Server
+FROM node:18-alpine AS server-builder
+
+WORKDIR /app/server
+
+# Copy server package files
+COPY frontend/server/package*.json ./
+COPY frontend/server/tsconfig.json ./
+
+# Install dependencies (including dev dependencies for TypeScript compilation)
+RUN npm ci
+
+# Copy server source code
+COPY frontend/server/src ./src
+
+# Compile TypeScript to JavaScript
+RUN npm run build
+
+# Stage 3: Final Runtime Image
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Install curl for health checks
+RUN apk add --no-cache curl
+
+# Copy compiled server application
+COPY --from=server-builder /app/server/dist /app/server/dist
+COPY --from=server-builder /app/server/package*.json /app/server/
+COPY --from=server-builder /app/server/node_modules /app/server/node_modules
+
+# Copy React build files
+COPY --from=frontend-builder /app/frontend/build /app/frontend/build
+
+# Set working directory to server
+WORKDIR /app/server
+
+# Expose port
+EXPOSE 8000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=60s --retries=3 \
+  CMD curl -f http://localhost:8000/api/health || exit 1
+
+# Start Express server
+CMD ["node", "dist/index.js"]
