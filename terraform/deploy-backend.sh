@@ -31,6 +31,119 @@ log_error() {
     echo -e "${RED}✗${NC} $1"
 }
 
+# Setup .env file
+setup_env_file() {
+    local project_root="$(cd "${SCRIPT_DIR}/.." && pwd)"
+    local env_file="${project_root}/.env"
+    local env_example="${project_root}/.env.example"
+
+    # If .env doesn't exist, create it from .env.example
+    if [ ! -f "$env_file" ]; then
+        if [ ! -f "$env_example" ]; then
+            log_error ".env.example not found at $env_example"
+            exit 1
+        fi
+
+        log_info "Creating .env file from .env.example..."
+        cp "$env_example" "$env_file"
+        log_info ".env file created at $env_file"
+    fi
+
+    # Update AWS_REGION from environment if set
+    if [ -n "$AWS_REGION" ]; then
+        sed -i.bak "s|^AWS_REGION=.*|AWS_REGION=$AWS_REGION|" "$env_file"
+        rm -f "${env_file}.bak"
+        log_info "AWS_REGION set to: $AWS_REGION"
+    fi
+
+    # Check and prompt for required/recommended values
+    echo ""
+    echo "Checking environment configuration..."
+    echo ""
+
+    local needs_input=false
+
+    # Check TAVILY_API_KEY (recommended)
+    if ! grep -q "^TAVILY_API_KEY=." "$env_file" 2>/dev/null; then
+        needs_input=true
+    fi
+
+    # Check LANGCHAIN_API_KEY (optional)
+    if ! grep -q "^LANGCHAIN_API_KEY=." "$env_file" 2>/dev/null; then
+        needs_input=true
+    fi
+
+    if [ "$needs_input" = true ]; then
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "  Optional API Keys Configuration"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo ""
+        echo "These API keys are optional but recommended for better research quality."
+        echo "You can skip them now and add them later to the .env file."
+        echo ""
+
+        # Prompt for TAVILY_API_KEY
+        if ! grep -q "^TAVILY_API_KEY=." "$env_file" 2>/dev/null; then
+            echo "1. Tavily AI Search (RECOMMENDED)"
+            echo "   - High-quality AI-powered search"
+            echo "   - Sign up: https://tavily.com/"
+            echo "   - Free tier: 1000 searches/month"
+            echo ""
+            read -p "Enter TAVILY_API_KEY (or press Enter to skip): " tavily_key
+            if [ -n "$tavily_key" ]; then
+                sed -i.bak "s|^TAVILY_API_KEY=.*|TAVILY_API_KEY=$tavily_key|" "$env_file"
+                log_info "TAVILY_API_KEY configured"
+            else
+                log_warn "TAVILY_API_KEY skipped (using DuckDuckGo fallback)"
+            fi
+            echo ""
+        fi
+
+        # Prompt for LANGCHAIN_API_KEY
+        if ! grep -q "^LANGCHAIN_API_KEY=." "$env_file" 2>/dev/null; then
+            echo "2. LangSmith Tracing (OPTIONAL)"
+            echo "   - For debugging and monitoring workflows"
+            echo "   - Sign up: https://smith.langchain.com/"
+            echo ""
+            read -p "Enter LANGCHAIN_API_KEY (or press Enter to skip): " langchain_key
+            if [ -n "$langchain_key" ]; then
+                sed -i.bak "s|^LANGCHAIN_API_KEY=.*|LANGCHAIN_API_KEY=$langchain_key|" "$env_file"
+                sed -i.bak "s|^LANGCHAIN_TRACING_V2=.*|LANGCHAIN_TRACING_V2=true|" "$env_file"
+                log_info "LANGCHAIN_API_KEY configured"
+            else
+                log_warn "LANGCHAIN_API_KEY skipped"
+            fi
+            echo ""
+        fi
+
+        # Prompt for Google Search API
+        echo "3. Google Custom Search (OPTIONAL)"
+        echo "   - Requires both API key and Search Engine ID"
+        echo "   - Sign up: https://developers.google.com/custom-search"
+        echo ""
+        read -p "Configure Google Search? (y/N): " configure_google
+        if [[ "$configure_google" =~ ^[Yy]$ ]]; then
+            read -p "Enter GOOGLE_API_KEY: " google_key
+            read -p "Enter GOOGLE_SEARCH_ENGINE_ID: " google_id
+            if [ -n "$google_key" ] && [ -n "$google_id" ]; then
+                sed -i.bak "s|^GOOGLE_API_KEY=.*|GOOGLE_API_KEY=$google_key|" "$env_file"
+                sed -i.bak "s|^GOOGLE_SEARCH_ENGINE_ID=.*|GOOGLE_SEARCH_ENGINE_ID=$google_id|" "$env_file"
+                log_info "Google Search API configured"
+            fi
+        fi
+        echo ""
+
+        # Clean up backup files
+        rm -f "${env_file}.bak"
+
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo ""
+    else
+        log_info "Environment configuration looks good"
+        echo ""
+    fi
+}
+
 # Load .env file if it exists
 load_env_file() {
     local env_file="${1:-.env}"
@@ -216,6 +329,7 @@ display_outputs() {
 
 # Main deployment flow
 main() {
+    setup_env_file
     load_env_file
     check_prerequisites
     deploy_infrastructure

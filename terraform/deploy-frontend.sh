@@ -34,6 +34,31 @@ log_error() {
     echo -e "${RED}✗${NC} $1"
 }
 
+# Setup .env file for frontend
+setup_frontend_env() {
+    local env_file="${FRONTEND_APP_DIR}/.env"
+    local env_example="${FRONTEND_APP_DIR}/.env.example"
+
+    # If .env doesn't exist, create it from .env.example
+    if [ ! -f "$env_file" ]; then
+        if [ ! -f "$env_example" ]; then
+            log_warn ".env.example not found at $env_example, skipping frontend .env setup"
+            return
+        fi
+
+        log_info "Creating frontend .env file from .env.example..."
+        cp "$env_example" "$env_file"
+        log_info "Frontend .env file created at $env_file"
+    fi
+
+    # Update AWS_REGION from environment if set
+    if [ -n "$AWS_REGION" ]; then
+        sed -i.bak "s|^REACT_APP_AWS_REGION=.*|REACT_APP_AWS_REGION=$AWS_REGION|" "$env_file"
+        rm -f "${env_file}.bak"
+        log_info "Frontend AWS_REGION set to: $AWS_REGION"
+    fi
+}
+
 # Check prerequisites
 check_prerequisites() {
     echo ""
@@ -105,7 +130,8 @@ build_frontend() {
     cd "$FRONTEND_TF_DIR"
 
     CLOUDFRONT_URL=$(terraform output -raw cloudfront_url)
-    AWS_REGION=$(aws configure get region || echo "us-west-2")
+    # Use environment variable AWS_REGION if set, otherwise fall back to AWS CLI config
+    REGION=${AWS_REGION:-$(aws configure get region || echo "us-west-2")}
     USER_POOL_ID=$(terraform output -raw cognito_user_pool_id)
     USER_POOL_CLIENT_ID=$(terraform output -raw cognito_user_pool_client_id)
     IDENTITY_POOL_ID=$(terraform output -raw cognito_identity_pool_id)
@@ -114,12 +140,12 @@ build_frontend() {
 
     log_info "Building React app with environment:"
     log_info "  API_URL: $CLOUDFRONT_URL"
-    log_info "  REGION: $AWS_REGION"
+    log_info "  REGION: $REGION"
 
     # Build with environment variables in a subshell to avoid polluting parent environment
     (
         export REACT_APP_API_URL="$CLOUDFRONT_URL"
-        export REACT_APP_AWS_REGION="$AWS_REGION"
+        export REACT_APP_AWS_REGION="$REGION"
         export REACT_APP_USER_POOL_ID="$USER_POOL_ID"
         export REACT_APP_USER_POOL_CLIENT_ID="$USER_POOL_CLIENT_ID"
         export REACT_APP_IDENTITY_POOL_ID="$IDENTITY_POOL_ID"
@@ -157,12 +183,13 @@ build_docker_image() {
     log_info "ECR Repository: $ECR_REPO"
 
     # Login to ECR
-    AWS_REGION=$(aws configure get region || echo "us-west-2")
+    # Use environment variable AWS_REGION if set, otherwise fall back to AWS CLI config
+    REGION=${AWS_REGION:-$(aws configure get region || echo "us-west-2")}
     AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 
-    log_info "Logging in to ECR..."
-    aws ecr get-login-password --region $AWS_REGION | \
-        docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+    log_info "Logging in to ECR in region: $REGION"
+    aws ecr get-login-password --region $REGION | \
+        docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com
 
     # Build Docker image for linux/amd64 (ECS Fargate)
     cd "$PROJECT_ROOT"
@@ -217,8 +244,12 @@ update_ecs_service() {
         return
     fi
 
-    log_info "Forcing new deployment of ECS service..."
+    # Use environment variable AWS_REGION if set, otherwise fall back to AWS CLI config
+    REGION=${AWS_REGION:-$(aws configure get region || echo "us-west-2")}
+
+    log_info "Forcing new deployment of ECS service in region: $REGION"
     aws ecs update-service \
+        --region $REGION \
         --cluster $CLUSTER_NAME \
         --service $SERVICE_NAME \
         --force-new-deployment \
@@ -293,6 +324,7 @@ display_outputs() {
 
 # Main deployment flow
 main() {
+    setup_frontend_env
     check_prerequisites
     deploy_infrastructure  # Deploy infra first to get CloudFront URL
     build_frontend         # Build with proper env vars

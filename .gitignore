@@ -1,23 +1,86 @@
+# ================================================================
+# Environment & Secrets
+# ================================================================
 .env
+.env.local
+.env.*.local
+frontend/.env
+frontend/server/.env
 .bedrock_agentcore.yaml
-venv
-workspace
-*__pycache__*
-.DS_Store
 terraform.tfvars
-*node_modules*
-output
-.claude
-test_output
-frontend-config.json
-gateway_config.json
+*.pem
+*.key
 
+# ================================================================
+# Python
+# ================================================================
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.hypothesis/
+
+# ================================================================
+# Node.js / Frontend
+# ================================================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnp
+.pnp.js
+frontend/build/
+frontend/dist/
+.cache/
+
+# ================================================================
 # Terraform
+# ================================================================
 **/.terraform/
-# Keep lock file for consistent provider versions
+# Keep lock file for consistent provider versions across team
 # **/.terraform.lock.hcl
 **/terraform.tfstate
 **/terraform.tfstate.backup
 **/terraform.tfstate.*.backup
+**/.terraform.tfstate.lock.info
 **/tfplan
 **/tfplan.binary
+**/crash.log
+**/crash.*.log
+
+# ================================================================
+# IDE & Editor
+# ================================================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# ================================================================
+# Build & Output
+# ================================================================
+workspace/
+output/
+test_output/
+*.log
+*.bak
+
+# ================================================================
+# Generated Config Files
+# ================================================================
+frontend-config.json
+gateway_config.json
+.claude

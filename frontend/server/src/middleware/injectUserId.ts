@@ -9,26 +9,40 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
+import { config } from '../config';
 
 /**
- * Inject verified user ID from ALB authentication
+ * Inject verified user ID from authentication
  *
- * This middleware must be placed AFTER albAuthMiddleware
+ * This middleware must be placed AFTER albAuthMiddleware or validateCognitoToken
+ *
+ * SECURITY: Only uses verified user IDs from authentication middleware.
+ * NEVER trusts client-provided x-user-id headers.
  */
 export function injectVerifiedUserId(req: Request, res: Response, next: NextFunction) {
-  // Use verified user ID from ALB authentication
+  // ALWAYS delete any client-provided x-user-id header to prevent spoofing
+  const clientProvidedId = req.headers['x-user-id'];
+  if (clientProvidedId) {
+    console.warn(`⚠️  Client attempted to provide x-user-id: ${String(clientProvidedId).substring(0, 8)}... (IGNORED)`);
+    delete req.headers['x-user-id'];
+  }
+
+  // Use verified user ID from authentication middleware (ALB or JWT)
   if (req.albUser?.sub) {
-    // Override any client-provided x-user-id with verified ALB user ID
+    // Override with verified user ID from authentication
     req.headers['x-user-id'] = req.albUser.sub;
-    console.log(`✅ Injected verified user ID from ALB: ${req.albUser.sub.substring(0, 8)}...`);
-  } else if (req.headers['x-user-id']) {
-    // Client provided user ID (from React Amplify Cognito)
-    // Keep the client-provided user ID
-    console.log(`ℹ️  Using client-provided user ID: ${String(req.headers['x-user-id']).substring(0, 8)}...`);
+    console.log(`✅ Injected verified user ID: ${req.albUser.sub.substring(0, 8)}...`);
+  } else if (config.auth.enabled) {
+    // Authentication is enabled but no verified user: reject
+    console.error('❌ No verified user ID available - authentication required');
+    return res.status(401).json({
+      error: 'Unauthorized',
+      message: 'Authentication required'
+    });
   } else {
-    // No authentication: use anonymous
+    // Authentication is disabled: allow anonymous access for development/testing
     req.headers['x-user-id'] = 'anonymous';
-    console.log('ℹ️  No authentication: using anonymous user ID');
+    console.warn('⚠️  Authentication disabled - using anonymous user ID (DEVELOPMENT ONLY)');
   }
 
   next();

@@ -7,6 +7,7 @@ import { config, loadConfigFromSSM, validateConfig } from './config';
 import { logger } from './middleware/logger';
 import { errorHandler } from './middleware/errorHandler';
 import { albAuthMiddleware } from './middleware/albAuth';
+import { validateCognitoToken } from './middleware/cognitoAuth';
 import { injectVerifiedUserId } from './middleware/injectUserId';
 import researchRoutes from './routes/research';
 import healthRoutes from './routes/health';
@@ -62,8 +63,39 @@ app.use(logger);
 // Health check endpoint (no auth required for ALB health checks)
 app.use('/api/health', healthRoutes);
 
-// API Routes - apply auth middleware only to /api routes
-app.use('/api', albAuthMiddleware);
+/**
+ * Hybrid Authentication Strategy
+ *
+ * 1. ALB Authentication (Production):
+ *    - ALB injects x-amzn-oidc-data header with verified JWT
+ *    - albAuthMiddleware parses it and populates req.albUser
+ *
+ * 2. Direct JWT Authentication (Local Development):
+ *    - Client sends Authorization: Bearer <jwt> header
+ *    - validateCognitoToken verifies JWT and populates req.albUser
+ *
+ * 3. User ID Injection:
+ *    - injectVerifiedUserId takes req.albUser.sub and injects as x-user-id
+ *    - NEVER trusts client-provided x-user-id headers
+ */
+app.use('/api', (req, res, next) => {
+  // Try ALB authentication first (production)
+  albAuthMiddleware(req, res, (err) => {
+    if (err) {
+      return next(err);
+    }
+
+    // If ALB auth succeeded, continue to user ID injection
+    if (req.albUser) {
+      return next();
+    }
+
+    // ALB auth not available, try direct JWT authentication (local dev)
+    validateCognitoToken(req, res, next);
+  });
+});
+
+// Inject verified user ID (after authentication)
 app.use('/api', injectVerifiedUserId);
 
 // Protected API routes

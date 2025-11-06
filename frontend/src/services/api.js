@@ -31,14 +31,31 @@ async function getUserId() {
 }
 
 /**
- * Create headers with user ID
+ * Create headers with authentication token
  */
 async function getHeaders(additionalHeaders = {}) {
-  const userId = await getUserId();
-  return {
-    'x-user-id': userId,
+  const headers = {
     ...additionalHeaders
   };
+
+  // Add JWT token if authentication is enabled
+  if (APP_CONFIG.features.authentication) {
+    try {
+      const session = await fetchAuthSession();
+      const idToken = session.tokens?.idToken?.toString();
+      if (idToken) {
+        headers['Authorization'] = `Bearer ${idToken}`;
+      }
+    } catch (error) {
+      console.warn('Failed to get auth token:', error);
+    }
+  } else {
+    // For development without auth, send x-user-id header
+    const userId = await getUserId();
+    headers['x-user-id'] = userId;
+  }
+
+  return headers;
 }
 
 class APIService {

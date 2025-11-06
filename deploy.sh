@@ -36,6 +36,67 @@ display_banner() {
     echo ""
 }
 
+# Select AWS Region
+select_region() {
+    echo "Select AWS Region:"
+    echo ""
+    echo "  1) us-east-1      (US East - N. Virginia)"
+    echo "  2) us-west-2      (US West - Oregon)"
+    echo "  3) ap-northeast-1 (Asia Pacific - Tokyo)"
+    echo "  4) ap-northeast-2 (Asia Pacific - Seoul)"
+    echo "  5) ap-southeast-1 (Asia Pacific - Singapore)"
+    echo "  6) eu-west-1      (Europe - Ireland)"
+    echo "  7) eu-central-1   (Europe - Frankfurt)"
+    echo "  8) Custom region"
+    echo ""
+
+    read -p "Select region (1-8) [default: 2]: " REGION_OPTION
+    REGION_OPTION=${REGION_OPTION:-2}
+    echo ""
+
+    case $REGION_OPTION in
+        1)
+            AWS_REGION="us-east-1"
+            ;;
+        2)
+            AWS_REGION="us-west-2"
+            ;;
+        3)
+            AWS_REGION="ap-northeast-1"
+            ;;
+        4)
+            AWS_REGION="ap-northeast-2"
+            ;;
+        5)
+            AWS_REGION="ap-southeast-1"
+            ;;
+        6)
+            AWS_REGION="eu-west-1"
+            ;;
+        7)
+            AWS_REGION="eu-central-1"
+            ;;
+        8)
+            read -p "Enter AWS region: " AWS_REGION
+            if [ -z "$AWS_REGION" ]; then
+                log_error "Region cannot be empty"
+                exit 1
+            fi
+            ;;
+        *)
+            log_error "Invalid option. Using default region: us-west-2"
+            AWS_REGION="us-west-2"
+            ;;
+    esac
+
+    # Export region for deployment scripts
+    export AWS_REGION
+    export TF_VAR_aws_region="$AWS_REGION"
+
+    log_info "Selected region: $AWS_REGION"
+    echo ""
+}
+
 # Display menu
 display_menu() {
     echo "What would you like to deploy?"
@@ -106,6 +167,7 @@ deploy_tools() {
 main() {
     display_banner
     check_scripts
+    select_region
     display_menu
 
     read -p "Select option (0-5): " OPTION

@@ -17,27 +17,28 @@ echo "================================================"
 
 # Get AWS account and region
 AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-AWS_REGION=$(aws configure get region || echo "us-west-2")
+# Use environment variable AWS_REGION if set, otherwise fall back to AWS CLI config
+REGION=${AWS_REGION:-$(aws configure get region || echo "us-west-2")}
 
 ECR_REPO_NAME="research-tools-finance-lambda"
 IMAGE_TAG="latest"
-ECR_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_NAME}"
+ECR_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${ECR_REPO_NAME}"
 
 echo "AWS Account: $AWS_ACCOUNT_ID"
-echo "Region: $AWS_REGION"
+echo "Region: $REGION"
 echo "ECR Repository: $ECR_REPO_NAME"
 
 # Create ECR repository if it doesn't exist
 echo ""
 echo -e "${YELLOW}📦 Creating ECR repository (if not exists)...${NC}"
-aws ecr describe-repositories --repository-names $ECR_REPO_NAME --region $AWS_REGION 2>/dev/null || \
-    aws ecr create-repository --repository-name $ECR_REPO_NAME --region $AWS_REGION
+aws ecr describe-repositories --repository-names $ECR_REPO_NAME --region $REGION 2>/dev/null || \
+    aws ecr create-repository --repository-name $ECR_REPO_NAME --region $REGION
 
 # Login to ECR
 echo ""
 echo -e "${YELLOW}🔐 Logging in to ECR...${NC}"
-aws ecr get-login-password --region $AWS_REGION | \
-    docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
+aws ecr get-login-password --region $REGION | \
+    docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com
 
 # Build Docker image
 echo ""
