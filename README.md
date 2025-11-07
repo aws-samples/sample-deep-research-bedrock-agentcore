@@ -1,4 +1,4 @@
-# Dimensional Research Agent
+# Deep Research with Bedrock AgentCore
 
 AI-powered research agent that conducts multi-dimensional analysis using AWS Bedrock AgentCore and LangGraph.
 
