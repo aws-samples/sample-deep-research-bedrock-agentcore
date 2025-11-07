@@ -6,7 +6,7 @@
  * 1. Edit shared/model_registry.json
  * 2. Run: npm run generate-config (or it runs automatically on build)
  *
- * Generated: 2025-11-07T04:09:43.892Z
+ * Generated: 2025-11-07T05:30:53.846Z
  */
 
 export const MODELS = {

@@ -95,10 +95,14 @@ class ConfigLoader:
             secret_string = response['SecretString']
             return json.loads(secret_string)
         except self.secrets_client.exceptions.ResourceNotFoundException:
-            logger.warning(f"Secret not found: {secret_arn}")
+            # Log only the last part of ARN to avoid exposing full path
+            secret_name = secret_arn.split(':')[-1] if ':' in secret_arn else secret_arn
+            logger.warning(f"Secret not found: .../{secret_name}")
             return None
         except Exception as e:
-            logger.error(f"Error getting secret {secret_arn}: {e}")
+            # Log only generic error to avoid exposing secret details
+            secret_name = secret_arn.split(':')[-1] if ':' in secret_arn else secret_arn
+            logger.error(f"Error accessing secret .../{secret_name}: {type(e).__name__}")
             return None
 
     def _find_parameter_by_suffix(self, suffix: str) -> Optional[str]:

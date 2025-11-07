@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import path from 'path';
 import fs from 'fs';
 import { config, loadConfigFromSSM, validateConfig } from './config';
@@ -30,6 +31,9 @@ async function initialize() {
 }
 
 const app = express();
+
+// Trust proxy for rate limiting (ALB/ELB sends X-Forwarded-For header)
+app.set('trust proxy', true);
 
 // Middleware
 const awsRegion = config.aws.region;
@@ -62,6 +66,27 @@ app.use(logger);
 
 // Health check endpoint (no auth required for ALB health checks)
 app.use('/api/health', healthRoutes);
+
+/**
+ * Rate Limiting for API endpoints
+ * Protects against brute force attacks and DoS attempts
+ * Settings are generous to not affect normal users
+ */
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 150, // Limit each IP to 150 requests per windowMs (very generous)
+  standardHeaders: true, // Return rate limit info in `RateLimit-*` headers
+  legacyHeaders: false, // Disable `X-RateLimit-*` headers
+  message: {
+    error: 'Too many requests from this IP, please try again later.',
+    retryAfter: 'Check the Retry-After header for wait time.'
+  },
+  // Skip rate limiting for health checks
+  skip: (req) => req.path === '/api/health'
+});
+
+// Apply rate limiter to all API routes
+app.use('/api', apiLimiter);
 
 /**
  * Hybrid Authentication Strategy
