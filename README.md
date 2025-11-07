@@ -11,6 +11,16 @@ AI-powered research agent that conducts multi-dimensional analysis using AWS Bed
 - **Multiple Outputs** - Markdown, Word, PDF with embedded charts
 - **Chat Interface** - Ask questions about research with context awareness
 
+## Demo
+
+<div align="center">
+  <a href="https://drive.google.com/file/d/1MG-cO2wQouPBwKWqyi4SY-zBZyIrn_6Q/view?usp=sharing">
+    <img src="https://img.shields.io/badge/▶️_Watch_Demo-4285F4?style=for-the-badge&logo=google-drive&logoColor=white" alt="Watch Demo"/>
+  </a>
+
+  <p><em>Click to watch the full demo video on Google Drive</em></p>
+</div>
+
 ## Quick Start
 
 ### 1. Clone Repository
