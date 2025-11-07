@@ -76,42 +76,6 @@ resource "aws_ecs_task_definition" "frontend" {
           value = var.environment
         },
         {
-          name  = "AGENTCORE_RUNTIME_ARN"
-          value = local.agent_runtime_arn
-        },
-        {
-          name  = "AGENTCORE_RUNTIME_ID"
-          value = local.agent_runtime_id
-        },
-        {
-          name  = "AGENTCORE_MEMORY_ID"
-          value = local.memory_id
-        },
-        {
-          name  = "AGENTCORE_CHAT_RUNTIME_ARN"
-          value = local.chat_agent_runtime_arn
-        },
-        {
-          name  = "AGENTCORE_CHAT_RUNTIME_ID"
-          value = local.chat_agent_runtime_id
-        },
-        {
-          name  = "AGENTCORE_CHAT_MEMORY_ID"
-          value = local.chat_memory_id
-        },
-        {
-          name  = "DYNAMODB_RESEARCH_STATUS_TABLE"
-          value = local.status_table_name
-        },
-        {
-          name  = "DYNAMODB_USER_PREFERENCES_TABLE"
-          value = local.user_preferences_table
-        },
-        {
-          name  = "S3_OUTPUTS_BUCKET"
-          value = local.outputs_bucket
-        },
-        {
           name  = "CORS_ORIGIN"
           value = "https://${aws_cloudfront_distribution.frontend.domain_name}"
         },

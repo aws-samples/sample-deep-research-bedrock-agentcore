@@ -116,6 +116,44 @@ resource "aws_ssm_parameter" "gateway_id" {
 }
 
 # ============================================================================
+# Backend-compatible Gateway Parameters (for Agent Runtime discovery)
+# ============================================================================
+# These parameters use a fixed path that Backend can discover without knowing suffix
+# Path format: /{project_name}/tools/gateway/url
+
+resource "aws_ssm_parameter" "gateway_url_backend_compat" {
+  name        = "/${var.project_name}/tools/gateway/url"
+  description = "Gateway URL for Agent Runtime (backend-compatible path)"
+  type        = "String"
+  value       = aws_bedrockagentcore_gateway.research_gateway.gateway_url
+
+  tags = merge(
+    local.common_tags,
+    {
+      Name    = "${var.project_name}-gateway-url-backend-compat"
+      Purpose = "Backend Runtime Integration"
+    }
+  )
+
+  depends_on = [aws_bedrockagentcore_gateway.research_gateway]
+}
+
+resource "aws_ssm_parameter" "gateway_region_backend_compat" {
+  name        = "/${var.project_name}/tools/config/region"
+  description = "Gateway region for Agent Runtime (backend-compatible path)"
+  type        = "String"
+  value       = data.aws_region.current.id
+
+  tags = merge(
+    local.common_tags,
+    {
+      Name    = "${var.project_name}-gateway-region-backend-compat"
+      Purpose = "Backend Runtime Integration"
+    }
+  )
+}
+
+# ============================================================================
 # Optional: LangSmith Configuration in Secrets Manager
 # ============================================================================
 # Only created if langchain_api_key is provided

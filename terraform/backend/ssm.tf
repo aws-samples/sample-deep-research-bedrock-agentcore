@@ -7,6 +7,7 @@ resource "aws_ssm_parameter" "agentcore_runtime_arn" {
   description = "Research Agent Runtime ARN"
   type        = "String"
   value       = awscc_bedrockagentcore_runtime.research_agent.agent_runtime_arn
+  overwrite   = true
 
   tags = local.common_tags
 }
@@ -16,6 +17,7 @@ resource "aws_ssm_parameter" "agentcore_runtime_id" {
   description = "Research Agent Runtime ID"
   type        = "String"
   value       = awscc_bedrockagentcore_runtime.research_agent.agent_runtime_id
+  overwrite   = true
 
   tags = local.common_tags
 }
@@ -26,6 +28,7 @@ resource "aws_ssm_parameter" "chat_runtime_arn" {
   description = "Chat Agent Runtime ARN"
   type        = "String"
   value       = awscc_bedrockagentcore_runtime.chat_agent.agent_runtime_arn
+  overwrite   = true
 
   tags = local.common_tags
 }
@@ -35,6 +38,7 @@ resource "aws_ssm_parameter" "chat_runtime_id" {
   description = "Chat Agent Runtime ID"
   type        = "String"
   value       = awscc_bedrockagentcore_runtime.chat_agent.agent_runtime_id
+  overwrite   = true
 
   tags = local.common_tags
 }
@@ -44,6 +48,7 @@ resource "aws_ssm_parameter" "dynamodb_status_table" {
   description = "DynamoDB Status Table Name"
   type        = "String"
   value       = aws_dynamodb_table.research_status.name
+  overwrite   = true
 
   tags = local.common_tags
 }
@@ -53,6 +58,7 @@ resource "aws_ssm_parameter" "dynamodb_user_preferences_table" {
   description = "DynamoDB User Preferences Table Name"
   type        = "String"
   value       = aws_dynamodb_table.user_preferences.name
+  overwrite   = true
 
   tags = local.common_tags
 }
@@ -62,6 +68,7 @@ resource "aws_ssm_parameter" "s3_outputs_bucket" {
   description = "S3 Outputs Bucket Name"
   type        = "String"
   value       = aws_s3_bucket.research_outputs.bucket
+  overwrite   = true
 
   tags = local.common_tags
 }
@@ -71,6 +78,7 @@ resource "aws_ssm_parameter" "agentcore_memory_id" {
   description = "AgentCore Memory ID for Research Agent (LTM with Semantic Search)"
   type        = "String"
   value       = aws_bedrockagentcore_memory.research_memory.id
+  overwrite   = true
 
   tags = local.common_tags
 }
@@ -80,6 +88,7 @@ resource "aws_ssm_parameter" "chat_memory_id" {
   description = "AgentCore Memory ID for Chat Agent (STM only)"
   type        = "String"
   value       = aws_bedrockagentcore_memory.chat_memory.id
+  overwrite   = true
 
   tags = local.common_tags
 }

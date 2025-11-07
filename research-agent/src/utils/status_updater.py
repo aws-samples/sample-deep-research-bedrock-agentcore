@@ -38,7 +38,9 @@ class ResearchStatusUpdater:
             return
 
         try:
-            self.ddb = boto3.resource('dynamodb')
+            # Get region from environment (set by AgentCore Runtime)
+            region = os.getenv('AWS_REGION', 'us-west-2')
+            self.ddb = boto3.resource('dynamodb', region_name=region)
             self.table = self.ddb.Table(self.table_name)
             self.enabled = True
             print(f"✅ Status updater initialized for session: {session_id}")

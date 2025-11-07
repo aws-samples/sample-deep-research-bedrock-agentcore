@@ -203,7 +203,7 @@ if __name__ == '__main__':
     import asyncio
 
     async def test_gateway_auth():
-        gateway_url = "https://research-gateway-research-tools-xxx.gateway.bedrock-agentcore.us-west-2.amazonaws.com/mcp"
+        gateway_url = "https://deep-research-agent-research-tools-xxx.gateway.bedrock-agentcore.us-west-2.amazonaws.com/mcp"
 
         print("Testing SigV4 authentication...")
         print(f"Gateway URL: {gateway_url}")

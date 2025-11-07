@@ -7,7 +7,7 @@ variable "aws_region" {
 variable "project_name" {
   description = "Project name"
   type        = string
-  default     = "deep-research"
+  default     = "deep-research-agent"
 }
 
 variable "environment" {

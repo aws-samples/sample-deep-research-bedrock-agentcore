@@ -46,7 +46,7 @@ resource "awscc_bedrockagentcore_runtime" "research_agent" {
 
   agent_runtime_artifact = {
     container_configuration = {
-      container_uri = "${awscc_ecr_repository.research_agent.repository_uri}:latest"
+      container_uri = "${aws_ecr_repository.research_agent.repository_url}:latest"
     }
   }
 
@@ -57,6 +57,7 @@ resource "awscc_bedrockagentcore_runtime" "research_agent" {
   environment_variables = {
     # AWS Configuration
     AWS_REGION = var.aws_region
+    PROJECT_NAME = var.project_name
 
     # DynamoDB Tables
     DYNAMODB_STATUS_TABLE = aws_dynamodb_table.research_status.name
@@ -176,7 +177,7 @@ resource "awscc_bedrockagentcore_runtime" "chat_agent" {
 
   agent_runtime_artifact = {
     container_configuration = {
-      container_uri = "${awscc_ecr_repository.chat_agent.repository_uri}:latest"
+      container_uri = "${aws_ecr_repository.chat_agent.repository_url}:latest"
     }
   }
 
@@ -187,6 +188,7 @@ resource "awscc_bedrockagentcore_runtime" "chat_agent" {
   environment_variables = {
     # AWS Configuration
     AWS_REGION = var.aws_region
+    PROJECT_NAME = local.project_name
 
     # DynamoDB Tables
     DYNAMODB_STATUS_TABLE = aws_dynamodb_table.research_status.name

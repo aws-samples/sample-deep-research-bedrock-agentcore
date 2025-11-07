@@ -1,3 +1,9 @@
+variable "project_name" {
+  description = "Project name for resource naming and SSM paths"
+  type        = string
+  default     = "deep-research-agent"
+}
+
 variable "aws_region" {
   description = "AWS region for deployment"
   type        = string

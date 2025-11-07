@@ -5,9 +5,9 @@ variable "aws_region" {
 }
 
 variable "project_name" {
-  description = "Project name for resource naming"
+  description = "Project name for resource naming (must match backend)"
   type        = string
-  default     = "research-gateway"
+  default     = "deep-research-agent"
 }
 
 variable "environment" {

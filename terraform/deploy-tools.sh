@@ -135,7 +135,17 @@ terraform init
 # Step 3: Terraform apply (auto-approved)
 echo ""
 echo "🚀 Step 3: Applying Terraform..."
+
+# Use same project name as backend for consistency
+PROJECT_NAME="deep-research-agent"
+REGION=${AWS_REGION:-$(aws configure get region || echo "us-west-2")}
+
+echo "📋 Using project_name: $PROJECT_NAME"
+echo "📋 Using region: $REGION"
+
 terraform apply -auto-approve \
+    -var="project_name=$PROJECT_NAME" \
+    -var="aws_region=$REGION" \
     -var="agentcore_memory_id=$AGENTCORE_MEMORY_ID" \
     -var="dynamodb_status_table=$DYNAMODB_STATUS_TABLE" \
     -var="s3_outputs_bucket=$S3_OUTPUTS_BUCKET" \

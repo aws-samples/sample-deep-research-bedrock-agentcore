@@ -34,7 +34,7 @@ resource "random_id" "suffix" {
 }
 
 locals {
-  project_name = "deep-research-agent"
+  project_name = var.project_name
   suffix       = random_id.suffix.hex
 
   common_tags = {

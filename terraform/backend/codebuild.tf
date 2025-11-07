@@ -27,7 +27,7 @@ resource "aws_codebuild_project" "research_agent_build" {
 
     environment_variable {
       name  = "ECR_REPOSITORY_URI"
-      value = awscc_ecr_repository.research_agent.repository_uri
+      value = aws_ecr_repository.research_agent.repository_url
     }
 
     environment_variable {
@@ -80,7 +80,7 @@ resource "aws_codebuild_project" "chat_agent_build" {
 
     environment_variable {
       name  = "ECR_REPOSITORY_URI"
-      value = awscc_ecr_repository.chat_agent.repository_uri
+      value = aws_ecr_repository.chat_agent.repository_url
     }
 
     environment_variable {

@@ -134,32 +134,34 @@ pre_destroy_cleanup() {
 
     cd "$BACKEND_DIR"
 
-    # Delete ECR repositories and all images (simpler than deleting images one by one)
-    RESEARCH_AGENT_REPO=$(terraform output -raw research_agent_ecr_url 2>/dev/null | cut -d'/' -f2- || echo "")
+    # Delete ECR repositories and all images
+    log_info "Deleting ECR repositories and all images..."
 
-    if [ -n "$RESEARCH_AGENT_REPO" ]; then
-        log_info "Deleting Research Agent ECR repository and all images..."
+    # Get AWS region from terraform or environment
+    AWS_REGION=$(terraform output -raw aws_region 2>/dev/null || echo "${TF_VAR_aws_region:-us-east-1}")
 
-        aws ecr delete-repository \
-            --repository-name "$RESEARCH_AGENT_REPO" \
-            --force \
-            --no-cli-pager > /dev/null 2>&1 || log_warn "Research Agent ECR repository already deleted or not found"
+    # Find all ECR repositories starting with "bedrock/deep-research-agent"
+    log_info "Searching for deep-research-agent ECR repositories in region: $AWS_REGION"
 
-        log_info "Research Agent ECR repository deleted"
-    fi
+    ECR_REPOS=$(aws ecr describe-repositories \
+        --region "$AWS_REGION" \
+        --no-cli-pager \
+        2>/dev/null | jq -r '.repositories[] | select(.repositoryName | startswith("bedrock/deep-research-agent")) | .repositoryName' || echo "")
 
-    # Delete ECR repository for chat agent
-    CHAT_AGENT_REPO=$(terraform output -raw chat_agent_ecr_url 2>/dev/null | cut -d'/' -f2- || echo "")
-
-    if [ -n "$CHAT_AGENT_REPO" ]; then
-        log_info "Deleting Chat Agent ECR repository and all images..."
-
-        aws ecr delete-repository \
-            --repository-name "$CHAT_AGENT_REPO" \
-            --force \
-            --no-cli-pager > /dev/null 2>&1 || log_warn "Chat Agent ECR repository already deleted or not found"
-
-        log_info "Chat Agent ECR repository deleted"
+    if [ -n "$ECR_REPOS" ]; then
+        while IFS= read -r repo; do
+            if [ -n "$repo" ]; then
+                log_info "Deleting ECR repository: $repo"
+                aws ecr delete-repository \
+                    --repository-name "$repo" \
+                    --force \
+                    --region "$AWS_REGION" \
+                    --no-cli-pager > /dev/null 2>&1 && log_info "  ✓ Deleted" || log_warn "  Failed or already deleted"
+            fi
+        done <<< "$ECR_REPOS"
+        log_info "All ECR repositories processed"
+    else
+        log_warn "No ECR repositories found (may already be deleted)"
     fi
 
     # Empty S3 buckets before destroy

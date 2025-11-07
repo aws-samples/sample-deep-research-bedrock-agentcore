@@ -7,8 +7,8 @@ output "summary" {
     suffix       = local.suffix
 
     ecr_repositories = {
-      research_agent = awscc_ecr_repository.research_agent.repository_uri
-      chat_agent     = awscc_ecr_repository.chat_agent.repository_uri
+      research_agent = aws_ecr_repository.research_agent.repository_url
+      chat_agent     = aws_ecr_repository.chat_agent.repository_url
     }
 
     agentcore_runtimes = {

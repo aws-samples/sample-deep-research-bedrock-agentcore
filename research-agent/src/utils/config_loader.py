@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 class ConfigLoader:
     """Load configuration from AWS Parameter Store, Secrets Manager, and .env"""
 
-    def __init__(self, project_name: str = "research-gateway", use_aws: bool = True):
+    def __init__(self, project_name: str = "deep-research-agent", use_aws: bool = True):
         """
         Initialize configuration loader
 
@@ -43,8 +43,10 @@ class ConfigLoader:
         # Initialize AWS clients if needed
         if self.use_aws:
             try:
-                self.ssm_client = boto3.client('ssm')
-                self.secrets_client = boto3.client('secretsmanager')
+                # Get region from environment (set by AgentCore Runtime)
+                region = os.getenv('AWS_REGION', 'us-west-2')
+                self.ssm_client = boto3.client('ssm', region_name=region)
+                self.secrets_client = boto3.client('secretsmanager', region_name=region)
                 self.aws_available = True
             except Exception as e:
                 logger.warning(f"AWS services not available: {e}. Falling back to .env")

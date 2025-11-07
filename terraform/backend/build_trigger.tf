@@ -7,7 +7,7 @@ resource "null_resource" "build_research_agent" {
   depends_on = [
     aws_codebuild_project.research_agent_build,
     aws_s3_bucket.codebuild_artifacts,
-    awscc_ecr_repository.research_agent
+    aws_ecr_repository.research_agent
   ]
 
   triggers = {
@@ -87,7 +87,7 @@ resource "null_resource" "build_chat_agent" {
   depends_on = [
     aws_codebuild_project.chat_agent_build,
     aws_s3_bucket.codebuild_artifacts,
-    awscc_ecr_repository.chat_agent
+    aws_ecr_repository.chat_agent
   ]
 
   triggers = {
