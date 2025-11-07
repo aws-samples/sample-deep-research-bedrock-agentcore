@@ -39,7 +39,7 @@ variable "google_search_engine_id" {
 variable "lambda_timeout" {
   description = "Lambda function timeout in seconds"
   type        = number
-  default     = 60
+  default     = 180
 }
 
 variable "lambda_memory_size" {
