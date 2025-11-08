@@ -87,9 +87,7 @@ def update_env_file(outputs):
 
     for line in lines:
         # Update AWS resource variables to match .env.example structure
-        if line.startswith("MEMORY_ID="):
-            updated_lines.append(f"MEMORY_ID={memory_id}")
-        elif line.startswith("AGENTCORE_MEMORY_ID="):
+        if line.startswith("AGENTCORE_MEMORY_ID="):
             updated_lines.append(f"AGENTCORE_MEMORY_ID={memory_id}")
         elif line.startswith("DYNAMODB_STATUS_TABLE="):
             updated_lines.append(f"DYNAMODB_STATUS_TABLE={dynamodb_status_table}")

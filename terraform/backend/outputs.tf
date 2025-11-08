@@ -1,3 +1,4 @@
+# Summary output for display
 output "summary" {
   description = "Deployment summary"
   value = {

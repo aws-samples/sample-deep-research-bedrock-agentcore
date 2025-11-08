@@ -121,15 +121,18 @@ setup_env_file() {
         echo "   - Requires both API key and Search Engine ID"
         echo "   - Sign up: https://developers.google.com/custom-search"
         echo ""
-        read -p "Configure Google Search? (y/N): " configure_google
-        if [[ "$configure_google" =~ ^[Yy]$ ]]; then
-            read -p "Enter GOOGLE_API_KEY: " google_key
+        read -p "Enter GOOGLE_API_KEY (or press Enter to skip): " google_key
+        if [ -n "$google_key" ]; then
             read -p "Enter GOOGLE_SEARCH_ENGINE_ID: " google_id
-            if [ -n "$google_key" ] && [ -n "$google_id" ]; then
+            if [ -n "$google_id" ]; then
                 sed -i.bak "s|^GOOGLE_API_KEY=.*|GOOGLE_API_KEY=$google_key|" "$env_file"
                 sed -i.bak "s|^GOOGLE_SEARCH_ENGINE_ID=.*|GOOGLE_SEARCH_ENGINE_ID=$google_id|" "$env_file"
                 log_info "Google Search API configured"
+            else
+                log_warn "Google Search Engine ID not provided, skipping"
             fi
+        else
+            log_warn "Google Search API skipped"
         fi
         echo ""
 
@@ -229,6 +232,95 @@ check_prerequisites() {
     log_info "AWS credentials configured"
 
     log_warn "Note: Docker is NOT required locally - CodeBuild will handle image builds"
+}
+
+# Import existing resources if found
+import_existing_resources() {
+    echo ""
+    echo "Checking for existing resources to import..."
+
+    cd "$BACKEND_DIR"
+
+    # Get AWS region
+    local region="${AWS_REGION:-${TF_VAR_aws_region:-us-west-2}}"
+
+    # Calculate suffix
+    local account_id=$(aws sts get-caller-identity --query Account --output text 2>/dev/null)
+    local suffix=$(echo -n "${account_id}" | md5sum 2>/dev/null | cut -c1-8 || echo -n "${account_id}" | md5 | cut -c1-8)
+
+    local imported=false
+
+    # Check and import DynamoDB tables
+    if aws dynamodb describe-table --table-name "deep-research-agent-status-${suffix}" --region "$region" --no-cli-pager &>/dev/null; then
+        if ! terraform state list | grep -q "aws_dynamodb_table.research_status"; then
+            log_info "Importing existing status table..."
+            terraform import "aws_dynamodb_table.research_status" "deep-research-agent-status-${suffix}" || log_warn "  Failed to import"
+            imported=true
+        fi
+    fi
+
+    if aws dynamodb describe-table --table-name "deep-research-agent-user-preferences-${suffix}" --region "$region" --no-cli-pager &>/dev/null; then
+        if ! terraform state list | grep -q "aws_dynamodb_table.user_preferences"; then
+            log_info "Importing existing user preferences table..."
+            terraform import "aws_dynamodb_table.user_preferences" "deep-research-agent-user-preferences-${suffix}" || log_warn "  Failed to import"
+            imported=true
+        fi
+    fi
+
+    # Check and import S3 buckets
+    if aws s3api head-bucket --bucket "deep-research-agent-outputs-${suffix}" 2>/dev/null; then
+        if ! terraform state list | grep -q "aws_s3_bucket.research_outputs"; then
+            log_info "Importing existing outputs bucket..."
+            terraform import "aws_s3_bucket.research_outputs" "deep-research-agent-outputs-${suffix}" || log_warn "  Failed to import"
+            imported=true
+        fi
+    fi
+
+    if aws s3api head-bucket --bucket "deep-research-agent-codebuild-${suffix}" 2>/dev/null; then
+        if ! terraform state list | grep -q "aws_s3_bucket.codebuild_artifacts"; then
+            log_info "Importing existing codebuild bucket..."
+            terraform import "aws_s3_bucket.codebuild_artifacts" "deep-research-agent-codebuild-${suffix}" || log_warn "  Failed to import"
+            imported=true
+        fi
+    fi
+
+    # Check and import Code Interpreter
+    local code_interpreter_id="deep_research_code_interpreter_${suffix}"
+    if aws bedrock-agentcore get-code-interpreter --code-interpreter-id "$code_interpreter_id" --region "$region" --no-cli-pager &>/dev/null; then
+        if ! terraform state list | grep -q "aws_bedrockagentcore_code_interpreter.research_code_interpreter"; then
+            log_info "Importing existing code interpreter..."
+            terraform import "aws_bedrockagentcore_code_interpreter.research_code_interpreter" "$code_interpreter_id" || log_warn "  Failed to import"
+            imported=true
+        fi
+    fi
+
+    # Check and import Memory resources
+    local research_memory_id="deep_research_memory_${suffix}"
+    local memories=$(aws bedrock-agentcore list-memories --region "$region" --no-cli-pager 2>/dev/null | jq -r '.memories[].memoryId' 2>/dev/null || echo "")
+
+    if echo "$memories" | grep -q "^${research_memory_id}$"; then
+        if ! terraform state list | grep -q "aws_bedrockagentcore_memory.research_memory"; then
+            log_info "Importing existing research memory..."
+            terraform import "aws_bedrockagentcore_memory.research_memory" "$research_memory_id" || log_warn "  Failed to import"
+            imported=true
+        fi
+    fi
+
+    local chat_memory_id="deep_research_chat_memory_${suffix}"
+    if echo "$memories" | grep -q "^${chat_memory_id}$"; then
+        if ! terraform state list | grep -q "aws_bedrockagentcore_memory.chat_memory"; then
+            log_info "Importing existing chat memory..."
+            terraform import "aws_bedrockagentcore_memory.chat_memory" "$chat_memory_id" || log_warn "  Failed to import"
+            imported=true
+        fi
+    fi
+
+    if [ "$imported" = true ]; then
+        log_info "Existing resources imported into Terraform state"
+    else
+        log_info "No existing resources to import"
+    fi
+    echo ""
 }
 
 # Deploy all infrastructure with CodeBuild
@@ -332,6 +424,7 @@ main() {
     setup_env_file
     load_env_file
     check_prerequisites
+    import_existing_resources
     deploy_infrastructure
     display_outputs
 }

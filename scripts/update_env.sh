@@ -30,10 +30,10 @@ fi
 # Extract outputs
 DYNAMODB_TABLE=$(terraform output -raw dynamodb_status_table 2>/dev/null || echo "")
 S3_BUCKET=$(terraform output -raw s3_outputs_bucket 2>/dev/null || echo "")
-MEMORY_ID=$(terraform output -raw agentcore_memory_id 2>/dev/null || echo "")
+AGENTCORE_MEMORY_ID=$(terraform output -raw agentcore_memory_id 2>/dev/null || echo "")
 AWS_REGION=$(terraform output -json | jq -r '.summary.value.region' 2>/dev/null || echo "us-west-2")
 
-if [ -z "$DYNAMODB_TABLE" ] || [ -z "$S3_BUCKET" ] || [ -z "$MEMORY_ID" ]; then
+if [ -z "$DYNAMODB_TABLE" ] || [ -z "$S3_BUCKET" ] || [ -z "$AGENTCORE_MEMORY_ID" ]; then
     echo "❌ Failed to get Terraform outputs"
     exit 1
 fi
@@ -48,7 +48,7 @@ AWS_REGION=$AWS_REGION
 # AWS Resources (from Terraform)
 DYNAMODB_STATUS_TABLE=$DYNAMODB_TABLE
 S3_OUTPUTS_BUCKET=$S3_BUCKET
-AGENTCORE_MEMORY_ID=$MEMORY_ID
+AGENTCORE_MEMORY_ID=$AGENTCORE_MEMORY_ID
 
 # LangSmith Configuration (Optional)
 LANGCHAIN_API_KEY=
@@ -84,7 +84,7 @@ else
         elif [[ "$line" =~ ^S3_OUTPUTS_BUCKET= ]]; then
             echo "S3_OUTPUTS_BUCKET=$S3_BUCKET" >> "$TEMP_FILE"
         elif [[ "$line" =~ ^AGENTCORE_MEMORY_ID= ]]; then
-            echo "AGENTCORE_MEMORY_ID=$MEMORY_ID" >> "$TEMP_FILE"
+            echo "AGENTCORE_MEMORY_ID=$AGENTCORE_MEMORY_ID" >> "$TEMP_FILE"
         elif [[ "$line" =~ ^AWS_REGION= ]]; then
             echo "AWS_REGION=$AWS_REGION" >> "$TEMP_FILE"
         else
@@ -100,7 +100,7 @@ else
 # AWS Resources (from Terraform)\\
 DYNAMODB_STATUS_TABLE=$DYNAMODB_TABLE\\
 S3_OUTPUTS_BUCKET=$S3_BUCKET\\
-AGENTCORE_MEMORY_ID=$MEMORY_ID
+AGENTCORE_MEMORY_ID=$AGENTCORE_MEMORY_ID
 " "$TEMP_FILE"
         rm "${TEMP_FILE}.bak"
     fi
@@ -115,6 +115,6 @@ echo "📊 AWS Resources:"
 echo "   AWS Region: $AWS_REGION"
 echo "   DynamoDB Table: $DYNAMODB_TABLE"
 echo "   S3 Bucket: $S3_BUCKET"
-echo "   Memory ID: $MEMORY_ID"
+echo "   Memory ID: $AGENTCORE_MEMORY_ID"
 echo ""
 echo "✅ Done! .env file is up to date."

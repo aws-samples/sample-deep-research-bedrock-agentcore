@@ -27,7 +27,7 @@ AI-powered research agent that conducts multi-dimensional analysis using AWS Bed
 
 ```bash
 git clone <repository-url>
-cd dimensional-research-agent
+cd sample-deep-research-bedrock-agentcore
 ```
 
 ### 2. Configure Environment
@@ -44,9 +44,22 @@ cp .env.example .env
 ```
 Choose option 5 (Everything) to deploy all components.
 
-### 4. Create User
+### 4. View Deployment Outputs
+
+After deployment completes, view all URLs, IDs, and ARNs:
 
 ```bash
+./scripts/show-outputs.sh
+```
+
+Or check the configuration files:
+- `frontend-config.json` - Frontend URLs and Cognito details
+- `.env` - Backend resource IDs
+
+### 5. Create User
+
+```bash
+# Use USER_POOL_ID from outputs above
 aws cognito-idp admin-create-user \
   --user-pool-id <USER_POOL_ID> \
   --username user@example.com \
@@ -55,9 +68,9 @@ aws cognito-idp admin-create-user \
   --message-action SUPPRESS
 ```
 
-### 5. Access Application
+### 6. Access Application
 
-Navigate to CloudFront URL from deployment output and log in.
+Navigate to the CloudFront URL from the outputs and log in with your credentials.
 
 ## Architecture
 
@@ -173,9 +186,8 @@ See [RESEARCH_METHODOLOGY.md](./RESEARCH_METHODOLOGY.md) for detailed workflow e
 ├── shared/
 │   └── model_registry.json # Model configuration
 ├── scripts/               # Utilities
-│   ├── update_env.py      # Update .env from Terraform
-│   ├── inspect_memory.py  # View research sessions
-│   └── test_workflow.py   # Test research workflow
+│   ├── show-outputs.sh    # Display deployment outputs
+│   └── update_env.py      # Update .env from Terraform
 └── deploy.sh              # Main deployment orchestrator
 ```
 
@@ -276,16 +288,28 @@ See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed instructions.
 - **AWS Account** with Bedrock enabled
 - **AWS CLI** v2+ configured
 - **Terraform** v1.0+
-- **Docker** (for frontend deployment)
+- **Docker** installed and running (required for frontend deployment)
 - **Node.js** 18+ (for frontend build)
 - **Python** 3.11+ (for scripts)
+
+## Useful Commands
+
+```bash
+# View all deployment outputs (URLs, IDs, ARNs)
+./scripts/show-outputs.sh
+
+# Update .env from Terraform outputs
+python scripts/update_env.py
+
+# Test gateway connection
+python terraform/tools/scripts/test-gateway-simple.py
+```
 
 ## Support
 
 - **Documentation:** See docs linked above
 - **Issues:** Open GitHub issue
 - **Logs:** Check CloudWatch logs
-- **Memory:** Use inspection scripts
 
 ## License
 

@@ -164,7 +164,7 @@ pre_destroy_cleanup() {
         log_warn "No ECR repositories found (may already be deleted)"
     fi
 
-    # Empty S3 buckets before destroy
+    # Empty S3 buckets (Terraform will delete them)
     log_info "Emptying S3 buckets..."
 
     # Get bucket names from state
@@ -176,40 +176,143 @@ pre_destroy_cleanup() {
             log_info "Emptying bucket: $bucket"
 
             # Check if bucket exists
-            if aws s3 ls "s3://${bucket}" --no-cli-pager > /dev/null 2>&1; then
-                # Delete all objects
-                log_info "  Deleting objects..."
-                aws s3 rm "s3://${bucket}" --recursive --no-cli-pager 2>&1 | grep -v "^$" || true
-
-                # Delete all object versions (if versioning enabled)
-                log_info "  Deleting versions..."
-                aws s3api delete-objects \
-                    --bucket "$bucket" \
-                    --delete "$(aws s3api list-object-versions \
-                        --bucket "$bucket" \
-                        --output json \
-                        --query '{Objects: Versions[].{Key:Key,VersionId:VersionId}}' \
-                        2>/dev/null)" \
-                    --no-cli-pager > /dev/null 2>&1 || true
-
-                # Delete all delete markers
-                aws s3api delete-objects \
-                    --bucket "$bucket" \
-                    --delete "$(aws s3api list-object-versions \
-                        --bucket "$bucket" \
-                        --output json \
-                        --query '{Objects: DeleteMarkers[].{Key:Key,VersionId:VersionId}}' \
-                        2>/dev/null)" \
-                    --no-cli-pager > /dev/null 2>&1 || true
-
-                log_info "  Bucket $bucket emptied"
+            if aws s3 ls "s3://${bucket}" --region "$AWS_REGION" --no-cli-pager > /dev/null 2>&1; then
+                # Empty bucket (Terraform will delete it)
+                aws s3 rm "s3://${bucket}" --recursive --region "$AWS_REGION" --no-cli-pager 2>&1 | grep -v "^$" || true
+                log_info "  ✓ Emptied bucket: $bucket"
             else
-                log_warn "  Bucket $bucket not found or already deleted"
+                log_warn "  Bucket $bucket not found"
             fi
         fi
     done
 
+    # Delete AgentCore Runtimes first (they depend on Memory)
+    log_info "Deleting AgentCore Runtimes..."
+
+    RESEARCH_RUNTIME_ID=$(terraform state show 'awscc_bedrockagentcore_runtime.research_agent' 2>/dev/null | grep -E '^\s*agent_runtime_id\s*=' | awk -F'"' '{print $2}')
+    CHAT_RUNTIME_ID=$(terraform state show 'awscc_bedrockagentcore_runtime.chat_agent' 2>/dev/null | grep -E '^\s*agent_runtime_id\s*=' | awk -F'"' '{print $2}')
+
+    if [ -n "$RESEARCH_RUNTIME_ID" ] && [ "$RESEARCH_RUNTIME_ID" != "" ]; then
+        log_info "Deleting research agent runtime: $RESEARCH_RUNTIME_ID"
+        aws bedrock-agentcore delete-agent-runtime \
+            --agent-runtime-id "$RESEARCH_RUNTIME_ID" \
+            --region "$AWS_REGION" \
+            --no-cli-pager > /dev/null 2>&1 && log_info "  ✓ Deleted" || log_warn "  Failed or already deleted"
+
+        # Wait a bit for deletion to propagate
+        sleep 5
+    fi
+
+    if [ -n "$CHAT_RUNTIME_ID" ] && [ "$CHAT_RUNTIME_ID" != "" ]; then
+        log_info "Deleting chat agent runtime: $CHAT_RUNTIME_ID"
+        aws bedrock-agentcore delete-agent-runtime \
+            --agent-runtime-id "$CHAT_RUNTIME_ID" \
+            --region "$AWS_REGION" \
+            --no-cli-pager > /dev/null 2>&1 && log_info "  ✓ Deleted" || log_warn "  Failed or already deleted"
+
+        # Wait a bit for deletion to propagate
+        sleep 5
+    fi
+
     log_info "Pre-destroy cleanup complete"
+}
+
+# Import ALL orphaned resources (any suffix) into Terraform state
+import_all_orphaned_resources() {
+    echo ""
+    log_info "Searching for ALL orphaned resources to import..."
+
+    cd "$BACKEND_DIR"
+
+    local imported=false
+
+    # Find and import ALL DynamoDB tables
+    log_info "Searching for DynamoDB tables..."
+    local all_status_tables=$(aws dynamodb list-tables --region "$AWS_REGION" --no-cli-pager 2>/dev/null | jq -r '.TableNames[] | select(startswith("deep-research-agent-status"))' || echo "")
+    local all_prefs_tables=$(aws dynamodb list-tables --region "$AWS_REGION" --no-cli-pager 2>/dev/null | jq -r '.TableNames[] | select(startswith("deep-research-agent-user-preferences"))' || echo "")
+
+    # Import first status table found (Terraform can only have one in state)
+    if [ -n "$all_status_tables" ]; then
+        local first_table=$(echo "$all_status_tables" | head -1)
+        if [ -n "$first_table" ] && ! terraform state list | grep -q "aws_dynamodb_table.research_status"; then
+            log_info "Importing status table: $first_table"
+            terraform import "aws_dynamodb_table.research_status" "$first_table" 2>/dev/null && imported=true || log_warn "  Failed"
+        fi
+    fi
+
+    # Import first prefs table found
+    if [ -n "$all_prefs_tables" ]; then
+        local first_table=$(echo "$all_prefs_tables" | head -1)
+        if [ -n "$first_table" ] && ! terraform state list | grep -q "aws_dynamodb_table.user_preferences"; then
+            log_info "Importing user preferences table: $first_table"
+            terraform import "aws_dynamodb_table.user_preferences" "$first_table" 2>/dev/null && imported=true || log_warn "  Failed"
+        fi
+    fi
+
+    # Find and import S3 buckets
+    log_info "Searching for S3 buckets..."
+    local all_output_buckets=$(aws s3 ls 2>/dev/null | grep "deep-research-agent-outputs" | awk '{print $3}' || echo "")
+    local all_codebuild_buckets=$(aws s3 ls 2>/dev/null | grep "deep-research-agent-codebuild" | awk '{print $3}' || echo "")
+
+    if [ -n "$all_output_buckets" ]; then
+        local first_bucket=$(echo "$all_output_buckets" | head -1)
+        if [ -n "$first_bucket" ] && ! terraform state list | grep -q "aws_s3_bucket.research_outputs"; then
+            log_info "Importing outputs bucket: $first_bucket"
+            terraform import "aws_s3_bucket.research_outputs" "$first_bucket" 2>/dev/null && imported=true || log_warn "  Failed"
+        fi
+    fi
+
+    if [ -n "$all_codebuild_buckets" ]; then
+        local first_bucket=$(echo "$all_codebuild_buckets" | head -1)
+        if [ -n "$first_bucket" ] && ! terraform state list | grep -q "aws_s3_bucket.codebuild_artifacts"; then
+            log_info "Importing codebuild bucket: $first_bucket"
+            terraform import "aws_s3_bucket.codebuild_artifacts" "$first_bucket" 2>/dev/null && imported=true || log_warn "  Failed"
+        fi
+    fi
+
+    # Find and import Code Interpreters
+    log_info "Searching for Code Interpreters..."
+    local all_cis=$(aws bedrock-agentcore list-code-interpreters --region "$AWS_REGION" --no-cli-pager 2>/dev/null | jq -r '.codeInterpreters[]? | select(.codeInterpreterName | startswith("deep_research")) | .codeInterpreterName' || echo "")
+
+    if [ -n "$all_cis" ]; then
+        local first_ci=$(echo "$all_cis" | head -1)
+        if [ -n "$first_ci" ] && ! terraform state list | grep -q "aws_bedrockagentcore_code_interpreter.research_code_interpreter"; then
+            log_info "Importing code interpreter: $first_ci"
+            terraform import "aws_bedrockagentcore_code_interpreter.research_code_interpreter" "$first_ci" 2>/dev/null && imported=true || log_warn "  Failed"
+        fi
+    fi
+
+    # Find and import Memories
+    log_info "Searching for Memories..."
+    local all_memories=$(aws bedrock-agentcore list-memories --region "$AWS_REGION" --no-cli-pager 2>/dev/null | jq -r '.memories[]? | select(.memoryId | startswith("deep_research")) | .memoryId' || echo "")
+
+    if [ -n "$all_memories" ]; then
+        local research_memories=$(echo "$all_memories" | grep -v "chat")
+        local chat_memories=$(echo "$all_memories" | grep "chat")
+
+        if [ -n "$research_memories" ]; then
+            local first_mem=$(echo "$research_memories" | head -1)
+            if [ -n "$first_mem" ] && ! terraform state list | grep -q "aws_bedrockagentcore_memory.research_memory"; then
+                log_info "Importing research memory: $first_mem"
+                terraform import "aws_bedrockagentcore_memory.research_memory" "$first_mem" 2>/dev/null && imported=true || log_warn "  Failed"
+            fi
+        fi
+
+        if [ -n "$chat_memories" ]; then
+            local first_mem=$(echo "$chat_memories" | head -1)
+            if [ -n "$first_mem" ] && ! terraform state list | grep -q "aws_bedrockagentcore_memory.chat_memory"; then
+                log_info "Importing chat memory: $first_mem"
+                terraform import "aws_bedrockagentcore_memory.chat_memory" "$first_mem" 2>/dev/null && imported=true || log_warn "  Failed"
+            fi
+        fi
+    fi
+
+    if [ "$imported" = true ]; then
+        log_info "Orphaned resources imported - Terraform will now manage them"
+    else
+        log_info "No orphaned resources found to import"
+    fi
+    echo ""
 }
 
 # Destroy infrastructure
@@ -223,6 +326,11 @@ destroy_infrastructure() {
 
     log_info "Initializing Terraform..."
     terraform init
+
+    # Remove Runtime resources from state (already deleted manually)
+    log_info "Removing Runtime resources from Terraform state..."
+    terraform state rm 'awscc_bedrockagentcore_runtime.research_agent' 2>/dev/null || true
+    terraform state rm 'awscc_bedrockagentcore_runtime.chat_agent' 2>/dev/null || true
 
     log_warn "Running Terraform destroy..."
     terraform destroy -auto-approve
@@ -261,6 +369,7 @@ main() {
     check_backend_exists
     confirm_destruction
     pre_destroy_cleanup
+    import_all_orphaned_resources
     destroy_infrastructure
     cleanup_local_files
     display_completion

@@ -111,6 +111,29 @@ display_menu() {
     echo ""
 }
 
+# Check Docker
+check_docker() {
+    log_step "Checking Docker..."
+
+    # Check if Docker is installed
+    if ! command -v docker &> /dev/null; then
+        log_error "Docker is not installed. Please install Docker first."
+        echo "  Visit: https://docs.docker.com/get-docker/"
+        exit 1
+    fi
+
+    # Check if Docker daemon is running
+    if ! docker info &> /dev/null; then
+        log_error "Docker daemon is not running. Please start Docker."
+        echo "  On macOS: Open Docker Desktop"
+        echo "  On Linux: sudo systemctl start docker"
+        exit 1
+    fi
+
+    log_info "Docker is running"
+    echo ""
+}
+
 # Check if scripts exist
 check_scripts() {
     local missing=0
@@ -166,6 +189,7 @@ deploy_tools() {
 # Main function
 main() {
     display_banner
+    check_docker
     check_scripts
     select_region
     display_menu

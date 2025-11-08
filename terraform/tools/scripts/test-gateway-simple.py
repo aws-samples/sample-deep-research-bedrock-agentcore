@@ -9,13 +9,8 @@ Uses AWS SigV4 authentication for AgentCore Gateway.
 import asyncio
 import json
 import sys
+import re
 from pathlib import Path
-
-# Add project root to path for imports
-# Script location: terraform/tools/scripts/test-gateway-simple.py
-# Project root: ../../../ (go up 3 levels)
-project_root = Path(__file__).parent.parent.parent.parent
-sys.path.insert(0, str(project_root))
 
 try:
     from mcp import ClientSession
@@ -26,11 +21,51 @@ except ImportError:
     sys.exit(1)
 
 try:
-    from src.utils.gateway_auth import get_sigv4_auth, get_gateway_region_from_url
-except ImportError as e:
-    print(f"❌ Failed to import gateway_auth: {e}")
-    print("   Make sure src/utils/gateway_auth.py exists")
+    import boto3
+    from botocore.auth import SigV4Auth
+    from botocore.awsrequest import AWSRequest
+except ImportError:
+    print("❌ boto3 not installed.")
+    print("   Install with: pip install boto3")
     sys.exit(1)
+
+
+def get_gateway_region_from_url(url: str) -> str:
+    """Extract AWS region from Gateway URL"""
+    match = re.search(r'\.([a-z]{2}-[a-z]+-\d)\.', url)
+    if match:
+        return match.group(1)
+    # Default to us-west-2
+    return 'us-west-2'
+
+
+def get_sigv4_auth(region: str = 'us-west-2'):
+    """Get AWS SigV4 authentication for bedrock-agentcore-gateway service"""
+    session = boto3.Session()
+    credentials = session.get_credentials()
+
+    class SigV4AuthWrapper:
+        def __init__(self, credentials, region):
+            self.credentials = credentials
+            self.region = region
+
+        def __call__(self, request):
+            # Convert to AWSRequest for signing
+            aws_request = AWSRequest(
+                method=request.method,
+                url=str(request.url),
+                data=request.body,
+                headers=dict(request.headers)
+            )
+
+            # Sign the request
+            SigV4Auth(self.credentials, 'bedrock-agentcore-gateway', self.region).add_auth(aws_request)
+
+            # Update original request headers
+            request.headers.update(dict(aws_request.headers))
+            return request
+
+    return SigV4AuthWrapper(credentials, region)
 
 
 async def quick_test(gateway_url: str):
