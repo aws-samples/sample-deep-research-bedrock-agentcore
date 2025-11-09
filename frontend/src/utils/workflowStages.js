@@ -1,5 +1,5 @@
 /**
- * Workflow stages mapping from dimensional-research-agent workflow.py
+ * Workflow stages mapping from sample-deep-research-bedrock-agentcore workflow.py
  */
 
 // Import from centralized model registry (auto-generated from shared/model_registry.json)

@@ -22,7 +22,7 @@ def get_langsmith_project() -> str:
     Returns:
         Project name from environment or default
     """
-    return os.getenv("LANGCHAIN_PROJECT", "dimensional-research-agent")
+    return os.getenv("LANGCHAIN_PROJECT", "sample-deep-research-bedrock-agentcore")
 
 
 def create_run_config(

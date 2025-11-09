@@ -187,7 +187,12 @@ async def test_gateway(gateway_url: str, region: str):
 
 def load_gateway_config():
     """Load gateway config from deployment"""
+    # Try terraform/tools/gateway_config.json
     config_path = Path(__file__).parent.parent / "gateway_config.json"
+
+    # Try project root (3 levels up from script)
+    if not config_path.exists():
+        config_path = Path(__file__).parent.parent.parent.parent / "gateway_config.json"
 
     if not config_path.exists():
         print("❌ gateway_config.json not found!")

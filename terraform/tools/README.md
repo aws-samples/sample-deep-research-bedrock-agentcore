@@ -76,7 +76,7 @@ LANGCHAIN_PROJECT=research-agent
 
 ```bash
 # Ensure .env file exists in parent directory
-cd /path/to/dimensional-research-agent
+cd /path/to/sample-deep-research-bedrock-agentcore
 cat .env  # Verify required values
 
 # Deploy everything
@@ -294,7 +294,7 @@ Free tier covers much of this for first year/low usage.
 
 **Solution**: Ensure `.env` file in parent directory contains all required values:
 ```bash
-cd /path/to/dimensional-research-agent
+cd /path/to/sample-deep-research-bedrock-agentcore
 cat .env  # Verify AGENTCORE_MEMORY_ID, DYNAMODB_STATUS_TABLE, S3_OUTPUTS_BUCKET exist
 ```
 

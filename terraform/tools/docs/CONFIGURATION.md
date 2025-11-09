@@ -85,7 +85,7 @@ GOOGLE_SEARCH_ENGINE_ID=xxxxx
 Ensure your `.env` file contains all required values:
 
 ```bash
-cd /path/to/dimensional-research-agent
+cd /path/to/sample-deep-research-bedrock-agentcore
 cat .env
 ```
 

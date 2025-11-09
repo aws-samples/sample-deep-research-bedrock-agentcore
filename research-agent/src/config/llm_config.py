@@ -61,7 +61,7 @@ MODEL_COMBINATIONS = {
         "report_writing": "nova_pro",
         "chart_generation": "nova_pro",
     },
-    "claude_sonnet": {
+    "claude_sonnet45": {
         # All stages use Sonnet 4.5 for optimal quality
         "reference_prep": "sonnet45",      # High quality summaries needed
         "topic_analysis": "sonnet45",      # Critical dimension identification
@@ -84,7 +84,7 @@ MODEL_COMBINATIONS = {
         "report_writing": "llama_maverick",
         "chart_generation": "llama_maverick",
     },
-    "claude_haiku": {
+    "claude_haiku45": {
         # All stages use Claude Haiku 4.5 - fastest and most cost-effective
         "reference_prep": "haiku45",
         "topic_analysis": "haiku45",
@@ -109,7 +109,7 @@ MODEL_COMBINATIONS = {
 }
 
 # Node-specific LLM assignments (will be set dynamically based on model combination)
-NODE_LLM_MAPPING = MODEL_COMBINATIONS["claude_sonnet"]  # Default to claude_sonnet
+NODE_LLM_MAPPING = MODEL_COMBINATIONS["claude_sonnet45"]  # Default to claude_sonnet45
 
 
 # ============================================================================
@@ -160,18 +160,18 @@ def get_llm_for_node(node_name: str, state: dict = None, **kwargs) -> ChatBedroc
     from botocore.config import Config
 
     # Determine which model combination to use
-    model_combination = "claude_sonnet"  # Default
+    model_combination = "claude_sonnet45"  # Default
 
     if state and isinstance(state, dict):
         research_config = state.get("research_config", {})
         if isinstance(research_config, dict):
-            llm_model = research_config.get("llm_model", "claude_sonnet")
+            llm_model = research_config.get("llm_model", "claude_sonnet45")
             # Validate and use the model combination
             if llm_model in MODEL_COMBINATIONS:
                 model_combination = llm_model
 
     # Get the model assignment for this node from the combination
-    node_mapping = MODEL_COMBINATIONS.get(model_combination, MODEL_COMBINATIONS["claude_sonnet"])
+    node_mapping = MODEL_COMBINATIONS.get(model_combination, MODEL_COMBINATIONS["claude_sonnet45"])
     model_type = node_mapping.get(node_name, "nova_pro")
 
     # Get the actual Bedrock model ID
@@ -259,18 +259,18 @@ def get_model_id_for_node(node_name: str, state: dict = None) -> str:
         'us.anthropic.claude-haiku-4-5-20251001-v1:0'
     """
     # Determine which model combination to use
-    model_combination = "claude_sonnet"  # Default
+    model_combination = "claude_sonnet45"  # Default
 
     if state and isinstance(state, dict):
         research_config = state.get("research_config", {})
         if isinstance(research_config, dict):
-            llm_model = research_config.get("llm_model", "claude_sonnet")
+            llm_model = research_config.get("llm_model", "claude_sonnet45")
             # Validate and use the model combination
             if llm_model in MODEL_COMBINATIONS:
                 model_combination = llm_model
 
     # Get the model assignment for this node from the combination
-    node_mapping = MODEL_COMBINATIONS.get(model_combination, MODEL_COMBINATIONS["claude_sonnet"])
+    node_mapping = MODEL_COMBINATIONS.get(model_combination, MODEL_COMBINATIONS["claude_sonnet45"])
     model_type = node_mapping.get(node_name, "nova_pro")
 
     # Get the actual Bedrock model ID

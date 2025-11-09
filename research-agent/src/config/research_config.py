@@ -98,7 +98,7 @@ class ResearchConfig:
                 - quick: 2 dimensions × 2 aspects, 3 results per search
                 - balanced: 3 dimensions × 3 aspects, 5 results per search (default)
                 - deep: 5 dimensions × 3 aspects, 7-10 results per search
-            llm_model: LLM model to use ("nova_pro", "claude_haiku", "claude_sonnet")
+            llm_model: LLM model to use ("nova_pro", "claude_haiku45", "claude_sonnet45", "qwen3_mixed", "llama_maverick")
             max_paper_content_chars: Max characters to extract from papers
             arxiv_max_results: Override default for depth (optional)
             web_search_max_results: Override default for depth (optional)

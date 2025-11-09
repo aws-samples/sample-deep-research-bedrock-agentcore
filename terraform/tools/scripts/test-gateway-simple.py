@@ -51,15 +51,20 @@ def get_sigv4_auth(region: str = 'us-west-2'):
 
         def __call__(self, request):
             # Convert to AWSRequest for signing
+            headers = dict(request.headers)
+
+            # Remove 'connection' header - causes signature mismatch
+            headers.pop("connection", None)
+
             aws_request = AWSRequest(
                 method=request.method,
                 url=str(request.url),
-                data=request.body,
-                headers=dict(request.headers)
+                data=request.content,
+                headers=headers
             )
 
             # Sign the request
-            SigV4Auth(self.credentials, 'bedrock-agentcore-gateway', self.region).add_auth(aws_request)
+            SigV4Auth(self.credentials, 'bedrock-agentcore', self.region).add_auth(aws_request)
 
             # Update original request headers
             request.headers.update(dict(aws_request.headers))
@@ -111,15 +116,22 @@ async def quick_test(gateway_url: str):
 
 
 async def main():
-    # Try to load from config
+    # Try to load from config (check multiple locations)
+    # 1. Try terraform/tools/gateway_config.json
     config_file = Path(__file__).parent.parent / "gateway_config.json"
 
+    # 2. Try project root (3 levels up from script)
+    if not config_file.exists():
+        config_file = Path(__file__).parent.parent.parent.parent / "gateway_config.json"
+
+    gateway_url = None
     if config_file.exists():
         with open(config_file, 'r') as f:
             config = json.load(f)
             gateway_url = config.get('gateway_url')
-            print(f"📄 Loaded from config: {config_file.name}")
-    else:
+            print(f"📄 Loaded from config: {config_file}")
+
+    if not gateway_url:
         gateway_url = input("Gateway URL: ").strip()
 
     if not gateway_url:
