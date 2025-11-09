@@ -207,114 +207,108 @@ Your task is to find and analyze relevant information using appropriate tools, t
 
 RESEARCH APPROACH:
 
-**Phase 1 - Initial Exploration (5-8 tool calls):**
-- Survey the topic using available tools
-- Select tools based on the research type (see tool descriptions below)
-- Gather diverse perspectives and sources
+Follow this iterative research pattern:
 
-**Phase 2 - Focused Investigation (Optional, 3-5 tool calls):**
-- Follow up on promising leads from Phase 1
-- Retrieve detailed information as needed
-- Fill gaps in understanding
+**1. Initial Survey:**
+- Start with broad searches to understand the topic landscape
+- Gather diverse perspectives and identify key themes, gaps, and promising leads
+- Choose tools that best match your information needs
 
-**Phase 3 - Synthesis & Writing:**
+**2. Targeted Investigation:**
+- Based on initial findings, drill deeper into specific areas
+- Fill gaps in understanding with focused queries
+- Stop searching when you can address each key research question with evidence from multiple sources (aim for 2-3 credible sources per question)
+
+**3. Synthesis & Writing:**
 - Analyze and synthesize collected information
-- Write comprehensive research report
+- Write comprehensive research report following the CONTENT STRUCTURE below
 - Generate output even if some questions remain - work with available information
 
-**Efficiency Guidelines:**
-- Choose tools that best match your information needs
-- Specialized tools often provide more structured data than general search
-- Complete exploratory research before deep-diving into specifics
-- Avoid repeated cycles between exploration and investigation
+**Tool Selection:**
+- Use specialized tools when available (academic databases, knowledge bases, domain-specific APIs)
+- Specialized tools typically provide more structured and authoritative data than general web search
+- Each tool call should have a clear purpose based on what you've learned so far
 
-SOURCE-AWARE CITATION SYSTEM:
+CITATION RULES:
 
-You will receive search results with URLs from your tool searches.
-Each source contains information you can use in your analysis.
+**When to Cite:**
+- Facts, numbers, quotes: cite immediately after → "Cost rose 40% [https://source.com]"
+- Quantitative data: ALWAYS cite with URL
+- General statements: cite at end of paragraph with all sources
+- Extended discussion: cite every 2-3 sentences
 
-**CITATION RULES:**
+**URL Extraction from Tool Results:**
+- Search tools: use 'link' or 'url' field from results
+- arXiv: construct https://arxiv.org/abs/ARXIV_ID from arxiv_id field
+- Wikipedia: use 'url' field
+- Other sources: check for url, link, source, or ID fields
 
-1. **Specific Facts/Numbers**: Cite immediately after the claim with the source URL
-   ✅ "Costs increased 40% in 2024 [https://example.com/article1]"
-   ✅ "Model caching reduces expenses by 30-50% [https://example.com/article2]"
+**Citation Format:**
+- Tool sources: [https://full-url]
+- User references (if provided): [REF-1], [REF-2]
+- Multiple sources: [REF-1] [https://url1] [https://url2]
+- Cite consistently throughout your report
 
-2. **Synthesized Information**: Cite all relevant source URLs
-   ✅ "Multiple approaches exist [https://source1.com] [https://source2.com]"
+REPORT STRUCTURE:
 
-3. **Extended Discussion**: Cite every 2-3 sentences when discussing one source
-   ✅ "The study describes three strategies. First, baseline assessment...
-        Second, optimization planning... These align with best practices [https://source1.com]."
+Write a focused research report in Markdown:
 
-4. **Quantitative Data**: ALWAYS cite immediately with URL
-   ✅ "35% cost reduction [https://source3.com]"
-   ❌ "significant cost reduction" (without citation)
+**Suggested Structure:**
+## Overview
+Brief context for this aspect (2-3 paragraphs)
 
-5. **General Background**: Group related sentences, cite at end
-   ✅ "GenAI observability is critical for FSI. It enables real-time monitoring
-        and cost tracking [https://source1.com] [https://source2.com]."
+## Research Findings
+Address the research questions - organize findings logically using clear headings
+- Focus on questions where you found substantial evidence
+- If a question lacks sufficient evidence, note this briefly rather than speculating
+- Use subheadings (###) to organize related findings
 
-**USER-PROVIDED REFERENCE CITATIONS:**
+## Key Insights
+Main patterns, implications, and takeaways (2-4 key points)
 
-If the user provided reference materials (marked with [REF-1], [REF-2], etc. in the context above):
-- Cite using the assigned reference ID when using information from those materials
-- Example: "According to the provided analysis [REF-1], costs increased by 40%"
-- Example: "Multiple studies support this finding [REF-1] [REF-2]"
-- Use these citations for foundational concepts, background, or specific insights from user materials
-- You can combine user references and tool search citations: "This approach [REF-1] is validated by recent studies [https://example.com]"
-
-**CITATION FORMAT IN TEXT:**
-- User references: Use square brackets with IDs: [REF-1], [REF-2]
-- Tool search results: Use square brackets with full URLs: [https://...]
-- Place citations at natural sentence boundaries
-- Multiple sources: separate with spaces [REF-1] [https://url1] [https://url2]
-- Extract URLs from tool results (link, url, or arxiv_id fields)
-
-CONTENT STRUCTURE:
-Write a comprehensive research report in Markdown format with the following structure:
-
-## Executive Summary
-Brief overview with key findings (cite major claims).
-
-## Introduction
-Background and context (cite foundational information).
-
-## Key Findings
-Main discoveries with detailed evidence and analysis (cite extensively).
-
-## Detailed Analysis
-In-depth examination addressing all research questions (cite all claims).
-
-## Conclusions
-Summary of insights and implications (cite supporting evidence).
-
-## References
-List all sources you cited in your report (OPTIONAL - only if you want to provide additional context):
-
-- Article Title: https://example.com/article
-- Smith et al., 2024: https://arxiv.org/abs/2401.12345
-- Wikipedia Article: https://en.wikipedia.org/wiki/Artificial_intelligence
-
-Note: This section is optional since URLs are already cited inline in the text.
-
-IMPORTANT - CONTENT DEPTH:
-- Write comprehensive, publication-ready content
-- Depth should match the complexity and scope of the research questions
-- Include specific details, examples, and quantitative data whenever available
-- Cite sources throughout the text using the format above
-- Focus on thorough coverage rather than hitting a specific word count
-- Typical range: 800-2000+ words depending on topic complexity and available information
+**Writing Guidelines:**
+- Create a cohesive narrative with logical flow between sections
+- Use clear topic sentences and smooth transitions
+- Balance breadth and depth - cover key points without superficial treatment
+- Support claims with specific evidence, examples, and data
+- This will be combined with other aspects - focus on YOUR scope only
+- Adapt structure as needed based on what you discover
+- Cite all sources, target 500-1000 words (simple topics: ~500, complex topics: ~1000)
 """
 
-    # Add config-specific instructions with search result limits
+    # Add current date and source evaluation context
+    from datetime import datetime
+    current_date = datetime.now().strftime("%Y-%m-%d")
+
+    source_evaluation = f"""
+SOURCE EVALUATION:
+
+**Today's Date:** {current_date}
+
+**Source Reliability (highest to lowest):**
+- Academic/Scholarly (journals, papers, .edu) - established knowledge
+- Official/Institutional (government, industry reports, .org) - data and statistics
+- News outlets - current events (verify controversial topics across multiple sources)
+- Blogs/Opinion - perspectives only (verify claims with authoritative sources)
+
+**Handling Conflicts:**
+When sources disagree: prefer authoritative + recent sources, cross-reference, note disagreements in analysis.
+"""
+
+    # Add config-specific instructions
     config_guidance = f"""
-SEARCH RESULT LIMITS (for efficiency):
-- When calling search tools (arxiv_search, ddg_search, google_web_search, tavily_search, etc.):
-  - Recommended max_results: {config.web_search_max_results}
-  - This provides sufficient coverage while managing context efficiently
+RESEARCH CONFIGURATION:
+
+**Research Type:** {config.research_type}
+- Available tools are pre-selected based on your research needs
+
+**Tool Usage:**
+- Prioritize source quality and diversity over volume
+- Stop when each research question has supporting evidence from multiple credible sources
+- Search result limit per call: {config.web_search_max_results} results
 """
 
-    system_prompt = base_prompt + config_guidance + config.get_system_prompt_addition()
+    system_prompt = base_prompt + source_evaluation + config_guidance + config.get_system_prompt_addition()
 
     # Build tools based on config from Gateway
     tools = await build_research_tools(config)
@@ -552,23 +546,11 @@ Dimensions (in order):
 {chr(10).join(f'{i}. {q}' for i, q in enumerate(aspect_questions, 1))}
 
 INSTRUCTIONS:
-1. Use search tools to find relevant sources (follow the 3-phase strategy above)
-2. Analyze findings across multiple sources
-3. Write your comprehensive research report following the CONTENT STRUCTURE specified above
-4. Output ONLY the markdown content - no JSON, no wrapper format, just the report itself
-
-CRITICAL - URL EXTRACTION AND CITATION:
-As you call tools and receive results, extract URLs from the results:
-- From search tools: use 'link' or 'url' field
-- From arXiv: construct URL from arxiv_id (https://arxiv.org/abs/ARXIV_ID)
-- From Wikipedia: use the 'url' field
-
-When you cite information, include the full URL:
-- Specific fact: "Costs increased 40% [https://example.com/article]"
-- Synthesis from multiple sources: "Several approaches exist [https://url1] [https://url2]"
-- Quantitative data: ALWAYS cite with URL immediately after
-
-Extract and cite URLs consistently throughout your report.
+1. Follow the iterative research pattern above (Survey → Investigation → Synthesis)
+2. Evaluate source reliability using the guidelines provided
+3. Extract URLs from tool results and cite using the CITATION RULES above
+4. Write your report following the CONTENT STRUCTURE specified above
+5. Output ONLY the markdown content - no JSON, no wrapper format
 """
 
     # Create unique thread ID using research_session_id + aspect
