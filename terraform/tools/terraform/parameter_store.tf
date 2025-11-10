@@ -10,6 +10,7 @@ resource "aws_ssm_parameter" "agentcore_memory_id" {
   description = "AgentCore Memory ID for research agent"
   type        = "String"
   value       = var.agentcore_memory_id
+  overwrite   = true
 
   tags = merge(
     local.common_tags,
@@ -25,6 +26,7 @@ resource "aws_ssm_parameter" "dynamodb_status_table" {
   description = "DynamoDB table name for research status tracking"
   type        = "String"
   value       = var.dynamodb_status_table
+  overwrite   = true
 
   tags = merge(
     local.common_tags,
@@ -40,6 +42,7 @@ resource "aws_ssm_parameter" "s3_outputs_bucket" {
   description = "S3 bucket name for research outputs"
   type        = "String"
   value       = var.s3_outputs_bucket
+  overwrite   = true
 
   tags = merge(
     local.common_tags,
@@ -55,6 +58,7 @@ resource "aws_ssm_parameter" "aws_region" {
   description = "AWS region for deployment"
   type        = "String"
   value       = var.aws_region
+  overwrite   = true
 
   tags = merge(
     local.common_tags,
@@ -70,6 +74,7 @@ resource "aws_ssm_parameter" "gateway_url" {
   description = "AgentCore Gateway URL for MCP client access"
   type        = "String"
   value       = aws_bedrockagentcore_gateway.research_gateway.gateway_url
+  overwrite   = true
 
   tags = merge(
     local.common_tags,
@@ -87,6 +92,7 @@ resource "aws_ssm_parameter" "gateway_arn" {
   description = "AgentCore Gateway ARN for IAM policies"
   type        = "String"
   value       = aws_bedrockagentcore_gateway.research_gateway.gateway_arn
+  overwrite   = true
 
   tags = merge(
     local.common_tags,
@@ -104,6 +110,7 @@ resource "aws_ssm_parameter" "gateway_id" {
   description = "AgentCore Gateway ID"
   type        = "String"
   value       = aws_bedrockagentcore_gateway.research_gateway.gateway_id
+  overwrite   = true
 
   tags = merge(
     local.common_tags,
@@ -126,6 +133,7 @@ resource "aws_ssm_parameter" "gateway_url_backend_compat" {
   description = "Gateway URL for Agent Runtime (backend-compatible path)"
   type        = "String"
   value       = aws_bedrockagentcore_gateway.research_gateway.gateway_url
+  overwrite   = true
 
   tags = merge(
     local.common_tags,
@@ -143,6 +151,7 @@ resource "aws_ssm_parameter" "gateway_region_backend_compat" {
   description = "Gateway region for Agent Runtime (backend-compatible path)"
   type        = "String"
   value       = data.aws_region.current.id
+  overwrite   = true
 
   tags = merge(
     local.common_tags,
@@ -195,6 +204,7 @@ resource "aws_ssm_parameter" "langchain_project" {
   description = "LangSmith project name for tracing"
   type        = "String"
   value       = var.langchain_project
+  overwrite   = true
 
   tags = merge(
     local.common_tags,
@@ -212,6 +222,7 @@ resource "aws_ssm_parameter" "langchain_tracing" {
   description = "Enable LangSmith tracing V2"
   type        = "String"
   value       = var.langchain_tracing_v2
+  overwrite   = true
 
   tags = merge(
     local.common_tags,
