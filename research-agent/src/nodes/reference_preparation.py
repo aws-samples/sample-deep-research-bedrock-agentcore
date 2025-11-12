@@ -91,7 +91,7 @@ def sanitize_pdf_name_for_bedrock(filename: str) -> str:
     return sanitized or "document"
 
 
-def generate_pdf_summary_with_bytes(
+async def generate_pdf_summary_with_bytes(
     pdf_bytes: bytes,
     title: str,
     note: str = "",
@@ -114,6 +114,7 @@ def generate_pdf_summary_with_bytes(
     """
     import boto3
     import os
+    import asyncio
 
     # Sanitize filename for Bedrock API
     sanitized_name = sanitize_pdf_name_for_bedrock(title)
@@ -163,36 +164,41 @@ When summarizing, pay special attention to insights relevant to these dimensions
             region_name=os.getenv('AWS_REGION', 'us-west-2')
         )
 
-        response = bedrock_runtime.converse(
-            modelId=model_id,
-            messages=[
-                {
-                    'role': 'user',
-                    'content': [
-                        {
-                            'document': {
-                                'format': 'pdf',
-                                'name': sanitized_name,
-                                'source': {
-                                    'bytes': pdf_bytes
+        # Use run_in_executor for sync boto3 call
+        loop = asyncio.get_event_loop()
+        response = await loop.run_in_executor(
+            None,
+            lambda: bedrock_runtime.converse(
+                modelId=model_id,
+                messages=[
+                    {
+                        'role': 'user',
+                        'content': [
+                            {
+                                'document': {
+                                    'format': 'pdf',
+                                    'name': sanitized_name,
+                                    'source': {
+                                        'bytes': pdf_bytes
+                                    }
                                 }
-                            }
-                        },
-                        {
-                            'text': f"""Analyze the following PDF reference material and create a comprehensive summary.
+                            },
+                            {
+                                'text': f"""Analyze the following PDF reference material and create a comprehensive summary.
 
 Title: {title}
 Type: PDF
 {user_note}
 
 Provide a structured summary following the format specified in the system prompt."""
-                        }
-                    ]
-                }
-            ],
-            system=[
-                {'text': system_prompt}
-            ]
+                            }
+                        ]
+                    }
+                ],
+                system=[
+                    {'text': system_prompt}
+                ]
+            )
         )
 
         # Extract summary from response
@@ -246,7 +252,7 @@ Provide a structured summary following the format specified in the system prompt
 """
 
 
-def generate_comprehensive_summary(
+async def generate_comprehensive_summary(
     title: str,
     content: str,
     ref_type: str,
@@ -328,7 +334,7 @@ When summarizing, pay special attention to insights relevant to these dimensions
                 HumanMessage(content=user_prompt)
             ]
 
-            response = llm.invoke(messages)
+            response = await llm.ainvoke(messages)
         else:
             from langchain_core.messages import SystemMessage, HumanMessage
 
@@ -337,7 +343,7 @@ When summarizing, pay special attention to insights relevant to these dimensions
                 HumanMessage(content=user_prompt)
             ]
 
-            response = llm.invoke(messages)
+            response = await llm.ainvoke(messages)
         summary_text = response.content
 
         # Extract key points (simple extraction from summary)
@@ -522,7 +528,7 @@ async def reference_preparation_node(state: ResearchState) -> Dict[str, Any]:
                 continue
 
             # Generate PDF summary directly with bytes
-            summary_result = generate_pdf_summary_with_bytes(
+            summary_result = await generate_pdf_summary_with_bytes(
                 pdf_bytes=pdf_bytes,
                 title=title,
                 note=note,
@@ -555,7 +561,7 @@ async def reference_preparation_node(state: ResearchState) -> Dict[str, Any]:
         content = loaded.get("content", "")
 
         # Generate comprehensive summary with dimension and research context
-        summary_result = generate_comprehensive_summary(
+        summary_result = await generate_comprehensive_summary(
             title=title,
             content=content,
             ref_type=ref_type,
