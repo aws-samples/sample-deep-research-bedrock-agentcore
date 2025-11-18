@@ -43,6 +43,7 @@ function AppContent({ user }) {
   const [notifications, setNotifications] = useState([]);
   const [userId, setUserId] = useState(null);
   const [userEmail, setUserEmail] = useState(null);
+  const [authReady, setAuthReady] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -57,6 +58,9 @@ function AppContent({ user }) {
         setUserEmail(cognitoUserEmail);
       } catch (error) {
         console.error('Failed to get user info:', error);
+      } finally {
+        // Mark auth as ready whether successful or not
+        setAuthReady(true);
       }
     };
     getUserInfo();
@@ -163,8 +167,20 @@ function AppContent({ user }) {
     return [baseBreadcrumb];
   };
 
+  // Show loading state until auth is ready
+  if (!authReady) {
+    return (
+      <Box textAlign="center" padding="xxl">
+        <Spinner size="large" />
+        <Box variant="p" padding={{ top: 's' }}>
+          Initializing...
+        </Box>
+      </Box>
+    );
+  }
+
   return (
-    <AuthContext.Provider value={{ userId, user }}>
+    <AuthContext.Provider value={{ userId, user, authReady }}>
       <TopNavigation
         identity={{
           href: '/overview',
