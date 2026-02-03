@@ -14,7 +14,7 @@ AI-powered research agent that conducts multi-dimensional analysis using AWS Bed
 ## Demo
 
 <div align="center">
-  <a href="https://drive.google.com/file/d/1MG-cO2wQouPBwKWqyi4SY-zBZyIrn_6Q/view?usp=sharing">
+  <a href="https://drive.google.com/file/d/1XK-BPhU0_CqOm9gMA_QYJkcy3V7Ny7I1/view?usp=sharing">
     <img src="https://img.shields.io/badge/▶️_Watch_Demo-4285F4?style=for-the-badge&logo=google-drive&logoColor=white" alt="Watch Demo"/>
   </a>
 
