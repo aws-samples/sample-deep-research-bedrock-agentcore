@@ -13,8 +13,8 @@ const API_BASE = getApiBaseUrl();
  */
 async function getUserId() {
   // For local development, use mock user ID if provided
-  if (process.env.REACT_APP_MOCK_USER_ID) {
-    return process.env.REACT_APP_MOCK_USER_ID;
+  if (process.env.VITE_MOCK_USER_ID) {
+    return process.env.VITE_MOCK_USER_ID;
   }
 
   if (!APP_CONFIG.features.authentication) {

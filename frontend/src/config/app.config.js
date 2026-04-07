@@ -6,26 +6,26 @@
 export const APP_CONFIG = {
   // API Configuration
   api: {
-    baseUrl: process.env.REACT_APP_API_URL || 'http://localhost:8000',
+    baseUrl: process.env.VITE_API_URL || 'http://localhost:8000',
     timeout: 30000, // 30 seconds
   },
 
   // AWS Configuration
   aws: {
-    region: process.env.REACT_APP_AWS_REGION || 'us-west-2',
+    region: process.env.VITE_AWS_REGION || 'us-west-2',
     agentcore: {
-      memoryId: process.env.REACT_APP_AGENTCORE_MEMORY_ID || 'ResearchMemory-2OeNa02agH',
+      memoryId: process.env.VITE_AGENTCORE_MEMORY_ID || 'ResearchMemory-2OeNa02agH',
     },
     cognito: {
-      userPoolId: process.env.REACT_APP_USER_POOL_ID || '',
-      clientId: process.env.REACT_APP_USER_POOL_CLIENT_ID || '',
-      region: process.env.REACT_APP_AWS_REGION || 'us-west-2',
+      userPoolId: process.env.VITE_USER_POOL_ID || '',
+      clientId: process.env.VITE_USER_POOL_CLIENT_ID || '',
+      region: process.env.VITE_AWS_REGION || 'us-west-2',
     },
   },
 
   // Polling Configuration
   polling: {
-    interval: parseInt(process.env.REACT_APP_POLLING_INTERVAL) || 5000, // 5 seconds
+    interval: parseInt(process.env.VITE_POLLING_INTERVAL) || 5000, // 5 seconds
     maxRetries: 3,
   },
 
@@ -44,15 +44,15 @@ export const APP_CONFIG = {
 
   // Feature Flags
   features: {
-    authentication: process.env.REACT_APP_ENABLE_AUTH === 'true',
+    authentication: process.env.VITE_ENABLE_AUTH === 'true',
     downloads: true,
     advancedSettings: true,
   },
 
   // Environment
-  env: process.env.NODE_ENV || 'development',
-  isDevelopment: process.env.NODE_ENV === 'development',
-  isProduction: process.env.NODE_ENV === 'production',
+  env: import.meta.env.MODE || 'development',
+  isDevelopment: import.meta.env.DEV,
+  isProduction: import.meta.env.PROD,
 };
 
 // Validate required configuration
