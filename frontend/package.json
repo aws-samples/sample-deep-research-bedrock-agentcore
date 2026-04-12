@@ -14,7 +14,7 @@
     "@cloudscape-design/design-tokens": "^3.0.60",
     "@cloudscape-design/global-styles": "^1.0.45",
     "aws-amplify": "^6.16.0",
-    "axios": "^1.13.5",
+    "axios": "^1.15.0",
     "buffer": "^6.0.3",
     "process": "^0.11.10",
     "react": "^18.2.0",
